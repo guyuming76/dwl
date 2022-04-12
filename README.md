@@ -10,7 +10,7 @@ gentoo-pipewire-launcher &
 fcitx5 -d
 ```
 
-
+--------what follows is from original dwl github repository--------------------
 
 
 
