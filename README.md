@@ -1,5 +1,10 @@
 The command i use to start dwl from tty:
-`dbus-run-session dwl -s ~/dwlstart`
+
+```
+
+dbus-run-session dwl -s ~/dwlstart
+```
+
 
 the content of dwlstart script:
 
