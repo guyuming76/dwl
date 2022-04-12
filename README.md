@@ -1,3 +1,21 @@
+The command i use to start dwl from tty:
+`dbus-run-session dwl -s ~/dwlstart`
+
+the content of dwlstart script:
+
+```
+#!/bin/sh
+
+gentoo-pipewire-launcher &
+fcitx5 -d
+```
+
+
+
+
+
+
+
 # dwl - dwm for Wayland
 
 Join us on our [Discord server](https://discord.gg/jJxZnrGPWN)!
