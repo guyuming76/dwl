@@ -1227,6 +1227,7 @@ focusclient(Client *c, int lift)
 	if (!c) {
 		/* With no client, all we have left is to clear focus */
 		wlr_seat_keyboard_notify_clear_focus(seat);
+		dwl_input_method_relay_set_focus(input_relay, NULL);
 		return;
 	}
 
