@@ -2429,7 +2429,7 @@ static void handle_im_popup_map(struct wl_listener *listener, void *data) {
 static void handle_im_popup_unmap(struct wl_listener *listener, void *data) {
 	struct dwl_input_popup *popup =
 		wl_container_of(listener, popup, popup_unmap);
-	input_popup_update(popup);
+	//input_popup_update(popup);
 
 	wlr_scene_node_destroy(popup->scene);
 }
@@ -2438,26 +2438,14 @@ static void handle_im_popup_destroy(struct wl_listener *listener, void *data) {
 	struct dwl_input_popup *popup =
 		wl_container_of(listener, popup, popup_destroy);
 	wl_list_remove(&popup->focused_surface_unmap.link);
-	wl_list_remove(&popup->popup_surface_commit.link);
+	//wl_list_remove(&popup->popup_surface_commit.link);
 	wl_list_remove(&popup->popup_destroy.link);
 	wl_list_remove(&popup->popup_unmap.link);
 	wl_list_remove(&popup->popup_map.link);
 	free(popup);
 }
 
-static void handle_im_popup_surface_commit(struct wl_listener *listener,
-		void *data) {
-	struct dwl_input_popup *popup =
-		wl_container_of(listener, popup, popup_surface_commit);
-	input_popup_update(popup);
-}
 
-static void handle_im_focused_surface_destroy(
-		struct wl_listener *listener, void *data) {
-	struct dwl_input_popup *popup =
-		wl_container_of(listener, popup, focused_surface_unmap);
-	input_popup_update(popup);
-}
 
 static void input_popup_set_focus(struct dwl_input_popup *popup,
 		struct wlr_surface *surface) {
@@ -2472,14 +2460,14 @@ static void input_popup_set_focus(struct dwl_input_popup *popup,
 		layer = layer_surface_from_wlr_layer_surface_v1(layer_surface);
 		wl_signal_add(&layer->layer_surface->events.unmap,
 				&popup->focused_surface_unmap);
-		input_popup_update(popup);
+		//input_popup_update(popup);
 		return;
 	}
 
 	client = client_from_wlr_surface(surface);
 	wl_signal_add(&client->surface.xdg->events.unmap,
 	 		&popup->focused_surface_unmap);
-	input_popup_update(popup);
+	//input_popup_update(popup);
 }
 
 
@@ -2506,12 +2494,12 @@ static void handle_im_new_popup_surface(struct wl_listener *listener, void *data
 		&popup->popup_surface->events.destroy, &popup->popup_destroy);
 	popup->popup_destroy.notify = handle_im_popup_destroy;
 
-	wl_signal_add(&popup->popup_surface->surface->events.commit,
-		&popup->popup_surface_commit);
-	popup->popup_surface_commit.notify = handle_im_popup_surface_commit;
+	/* wl_signal_add(&popup->popup_surface->surface->events.commit, */
+	/* 	&popup->popup_surface_commit); */
+	/* popup->popup_surface_commit.notify = handle_im_popup_surface_commit; */
 
 	wl_list_init(&popup->focused_surface_unmap.link);
-	popup->focused_surface_unmap.notify = handle_im_focused_surface_destroy;
+	/* popup->focused_surface_unmap.notify = handle_im_focused_surface_destroy; */
 
 	text_input = relay_get_focused_text_input(relay);
 	if (text_input) {
