@@ -2237,7 +2237,7 @@ static void handle_text_input_destroy(struct wl_listener *listener,
 	text_input_set_pending_focused_surface(text_input, NULL);
 	wl_list_remove(&text_input->text_input_commit.link);
 	wl_list_remove(&text_input->text_input_destroy.link);
-	wl_list_remove(&text_input->text_input_disable.link);
+	//wl_list_remove(&text_input->text_input_disable.link);
 	wl_list_remove(&text_input->text_input_enable.link);
 	wl_list_remove(&text_input->link);
 	free(text_input);
@@ -2273,8 +2273,8 @@ struct dwl_text_input *dwl_text_input_create(
 	input->text_input_commit.notify = handle_text_input_commit;
 	wl_signal_add(&text_input->events.commit, &input->text_input_commit);
 
-	input->text_input_disable.notify = handle_text_input_disable;
-	wl_signal_add(&text_input->events.disable, &input->text_input_disable);
+	/* input->text_input_disable.notify = handle_text_input_disable; */
+	/* wl_signal_add(&text_input->events.disable, &input->text_input_disable); */
 
 	input->text_input_destroy.notify = handle_text_input_destroy;
 	wl_signal_add(&text_input->events.destroy, &input->text_input_destroy);
