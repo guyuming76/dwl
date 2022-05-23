@@ -2232,7 +2232,7 @@ static void handle_text_input_destroy(struct wl_listener *listener,
 		text_input_destroy);
 
 	if (text_input->input->current_enabled) {
-		relay_disable_text_input(text_input->relay, text_input);
+	  //relay_disable_text_input(text_input->relay, text_input);
 	}
 	text_input_set_pending_focused_surface(text_input, NULL);
 	wl_list_remove(&text_input->text_input_commit.link);
