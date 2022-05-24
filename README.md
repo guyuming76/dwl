@@ -21,13 +21,20 @@ fcitx5 -d
 
 
 
-Links :
+History :
 
 https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3433
+
 https://github.com/djpohly/dwl/pull/235
 
-https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3427
-https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3422
-https://github.com/fcitx/fcitx5/discussions/481
-https://github.com/djpohly/dwl/pull/12
 
+
+https://gitee.com/guyuming76/dwl/tree/guyuming4/   (summary for phase PR12)
+
+https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3427
+
+https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3422
+
+https://github.com/fcitx/fcitx5/discussions/481
+
+https://github.com/djpohly/dwl/pull/12
