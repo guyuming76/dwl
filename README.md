@@ -27,7 +27,7 @@ done
 ```
 
 
---------------------waybar usage ----------------------------------------------------------
+-------------------------------------------------------------------------------------------
 
 i put waybar related scripts in the following link, i think better way to clean the ~/.cache/dwltags file should be provided.
 
