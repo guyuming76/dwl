@@ -15,8 +15,15 @@ the content of dwlstart script:
 ```
 #!/bin/sh
 
+fname="$HOME"/.cache/dwltags
+
 gentoo-pipewire-launcher &
 fcitx5 -d
+waybar &
+
+while
+	read line; do echo $line >> ${fname} ;
+done
 ```
 
 
