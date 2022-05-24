@@ -20,6 +20,15 @@ fcitx5 -d
 ```
 
 
+--------------------waybar usage ----------------------------------------------------------
+
+i put waybar related scripts in the following link, i think better way to clean the ~/.cache/dwltags file should be provided.
+
+https://gitee.com/guyuming76/personal/tree/dwl/gentoo/waybar-dwl
+
+-------------------------------------------------------------------------------------------
+
+
 
 History :
 
