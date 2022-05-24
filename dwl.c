@@ -2502,7 +2502,7 @@ static void handle_im_new_popup_surface(struct wl_listener *listener, void *data
 	if (text_input) {
 		input_popup_set_focus(popup, text_input->input->focused_surface);
 	} else {
-		input_popup_set_focus(popup, NULL);
+	  //input_popup_set_focus(popup, NULL);
 	}
 
 }
