@@ -39,7 +39,7 @@ https://gitee.com/guyuming76/personal/tree/dwl/gentoo/waybar-dwl
 
 History :
 
-https://gitee.com/guyuming76/dwl/commit/59328d6ecbbef1b1cd6e5ea8d90d78ccddd5c263
+https://gitee.com/guyuming76/dwl/commit/59328d6ecbbef1b1cd6e5ea8d90d78ccddd5c263 （中文总结）
 
 https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3433
 
@@ -52,6 +52,10 @@ https://gitee.com/guyuming76/dwl/tree/guyuming4/   (summary for phase PR12)
 https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3427
 
 https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3422
+
+https://github.com/djpohly/dwl/issues/231
+
+https://github.com/djpohly/dwl/issues/224
 
 https://github.com/fcitx/fcitx5/discussions/481
 
