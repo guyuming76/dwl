@@ -1,0 +1,15 @@
+dwl_input_method_relay->text_inputs 保存了 wlr_text_input_v3 类型列表;
+由 wlr_text_input_manager_v3->events.text_inputs 事件间接触发  dwl_text_input_create 方法插入列表元素;
+
+重要的是，不同于 alacritty 这样的 wayland 客户端， geogebra 这样的 xwayland 客户端启动时 events.text_inputs 并不触发,
+也就是说 dwl_input_method_replay->text_input 列表里面并不包含 xwayland 客户端对应的 text_input 对象;
+
+focusclient 方法处理 一个surface失去focus 和另一surface 获得focus 这两件事;
+除了添加输入法支持之前的动作，还需调用 dwl_input_method_relay_set_focus 来处理 text_input “失去和得到focus”;
+
+dwl_input_method_relay_set_focus 方法比较难理解：两个输入参数中第一个 relay 参数没啥好说的，第二个 surface 参数是“进入” 的 text_input 对应的 surface;
+但参数没直接包含要“进入”的 text_input，更没包含要"离开"的text_input。
+解决的方法是循环整个 dwl_input_method_relay->text_input 列表，查找要 wlr_text_input_v3_send_leave 的 text_input 和 wlr_text_input_send_enter 的text_input;
+注意，如前所述，text_inputs列表中未包含 xwayland 类型client 的对应 text_input, 所以当xwayland类型client对应surface 获得focus时，会通过 relay_disable_text_input 间接调用 wlr_input_method_v2_send_deactivate 失活整个 input_method， 并一直保持到下次某个wayland类型client对应surface获得focus时再调用 wlr_input_method_v2_send_activate 激活
+
+https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3433
