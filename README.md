@@ -39,7 +39,7 @@ https://gitee.com/guyuming76/personal/tree/dwl/gentoo/waybar-dwl
 
 History :
 
-https://gitee.com/guyuming76/dwl/commit/59328d6ecbbef1b1cd6e5ea8d90d78ccddd5c263 （中文总结）
+https://gitee.com/guyuming76/dwl/commit/59328d6ecbbef1b1cd6e5ea8d90d78ccddd5c263 （中文摘要）
 
 https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3433
 
