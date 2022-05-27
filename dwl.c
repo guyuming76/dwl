@@ -873,6 +873,8 @@ commitnotify(struct wl_listener *listener, void *data)
 	/* mark a pending resize as completed */
 	if (c->resize && c->resize <= c->surface.xdg->current.configure_serial)
 		c->resize = 0;
+	else if (c->resize)
+		c->resize = client_set_size(c, c->geom.width - 2 * c->bw, c->geom.height - 2 * c->bw);
 }
 
 void
@@ -1071,17 +1073,36 @@ createpointer(struct wlr_input_device *device)
 		struct libinput_device *libinput_device =  (struct libinput_device*)
 			wlr_libinput_get_device_handle(device);
 
-		if (tap_to_click && libinput_device_config_tap_get_finger_count(libinput_device))
-			libinput_device_config_tap_set_enabled(libinput_device, LIBINPUT_CONFIG_TAP_ENABLED);
+		if (libinput_device_config_tap_get_finger_count(libinput_device)) {
+			libinput_device_config_tap_set_enabled(libinput_device, tap_to_click);
+			libinput_device_config_tap_set_drag_enabled(libinput_device, tap_and_drag);
+			libinput_device_config_tap_set_drag_lock_enabled(libinput_device, drag_lock);
+		}
 
 		if (libinput_device_config_scroll_has_natural_scroll(libinput_device))
 			libinput_device_config_scroll_set_natural_scroll_enabled(libinput_device, natural_scrolling);
+
+		if (libinput_device_config_dwt_is_available(libinput_device))
+			libinput_device_config_dwt_set_enabled(libinput_device, disable_while_typing);
+
+		if (libinput_device_config_left_handed_is_available(libinput_device))
+			libinput_device_config_left_handed_set(libinput_device, left_handed);
+
+		if (libinput_device_config_middle_emulation_is_available(libinput_device))
+			libinput_device_config_middle_emulation_set_enabled(libinput_device, middle_button_emulation);
+
+		if (libinput_device_config_scroll_get_methods(libinput_device) != LIBINPUT_CONFIG_SCROLL_NO_SCROLL)
+			libinput_device_config_scroll_set_method (libinput_device, scroll_method);
+
+		if (libinput_device_config_send_events_get_modes(libinput_device))
+			libinput_device_config_send_events_set_mode(libinput_device, send_events_mode);
+
+		if (libinput_device_config_accel_is_available(libinput_device)) {
+			libinput_device_config_accel_set_profile(libinput_device, accel_profile);
+			libinput_device_config_accel_set_speed(libinput_device, accel_speed);
+		}
 	}
 
-	/* We don't do anything special with pointers. All of our pointer handling
-	 * is proxied through wlr_cursor. On another compositor, you might take this
-	 * opportunity to do libinput configuration on the device to set
-	 * acceleration, etc. */
 	wlr_cursor_attach_input_device(cursor, device);
 }
 
@@ -1116,6 +1137,7 @@ destroylayersurfacenotify(struct wl_listener *listener, void *data)
 	wl_list_remove(&layersurface->map.link);
 	wl_list_remove(&layersurface->unmap.link);
 	wl_list_remove(&layersurface->surface_commit.link);
+	wlr_scene_node_destroy(layersurface->scene);
 	if (layersurface->layer_surface->output) {
 		Monitor *m = layersurface->layer_surface->output->data;
 		if (m)
@@ -1212,8 +1234,7 @@ focusclient(Client *c, int lift)
 				return;
 		} else {
 			Client *w;
-			struct wlr_scene_node *node = old->data;
-			if (old->role_data && (w = node->data))
+			if (old->role_data && (w = client_from_wlr_surface(old)))
 				for (i = 0; i < 4; i++)
 					wlr_scene_rect_set_color(w->border[i], bordercolor);
 
@@ -1486,10 +1507,12 @@ mapnotify(struct wl_listener *listener, void *data)
 
 	/* Create scene tree for this client and its border */
 	c->scene = &wlr_scene_tree_create(layers[LyrTile])->node;
-	c->scene_surface = client_surface(c)->data = c->type == XDGShell
+	c->scene_surface = c->type == XDGShell
 			? wlr_scene_xdg_surface_create(c->scene, c->surface.xdg)
 			: wlr_scene_subsurface_tree_create(c->scene, client_surface(c));
-	c->scene_surface->data = c;
+	if (client_surface(c))
+		client_surface(c)->data = c->scene;
+	c->scene->data = c->scene_surface->data = c;
 
 	if (client_is_unmanaged(c)) {
 		client_get_geometry(c, &c->geom);
@@ -1504,7 +1527,6 @@ mapnotify(struct wl_listener *listener, void *data)
 		c->border[i] = wlr_scene_rect_create(c->scene, 0, 0, bordercolor);
 		c->border[i]->node.data = c;
 		wlr_scene_rect_set_color(c->border[i], bordercolor);
-		wlr_scene_node_lower_to_bottom(&c->border[i]->node);
 	}
 
 	/* Initialize client geometry with room for border */
@@ -2962,11 +2984,7 @@ void
 urgent(struct wl_listener *listener, void *data)
 {
 	struct wlr_xdg_activation_v1_request_activate_event *event = data;
-	Client *c;
-
-	if (!wlr_surface_is_xdg_surface(event->surface))
-		return;
-	c = wlr_xdg_surface_from_wlr_surface(event->surface)->data;
+	Client *c = client_from_wlr_surface(event->surface);
 	if (c != selclient()) {
 		c->isurgent = 1;
 		printstatus();
