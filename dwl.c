@@ -27,7 +27,9 @@
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_idle_inhibit_v1.h>
 #include <wlr/types/wlr_input_inhibitor.h>
+#ifdef IM
 #include <wlr/types/wlr_input_method_v2.h>
+#endif
 #include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/types/wlr_keyboard.h>
 #include <wlr/types/wlr_layer_shell_v1.h>
@@ -42,7 +44,9 @@
 #include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_server_decoration.h>
+#ifdef IM
 #include <wlr/types/wlr_text_input_v3.h>
+#endif
 #include <wlr/types/wlr_viewporter.h>
 #include <wlr/types/wlr_virtual_keyboard_v1.h>
 #include <wlr/types/wlr_xcursor_manager.h>
@@ -72,7 +76,18 @@
 /* enums */
 enum { CurNormal, CurMove, CurResize }; /* cursor */
 enum { XDGShell, LayerShell, X11Managed, X11Unmanaged }; /* client types */
-enum { LyrBg, LyrBottom, LyrTop, LyrOverlay, LyrTile, LyrFloat, LyrIMEPopup,LyrNoFocus, NUM_LAYERS }; /* scene layers */
+enum {
+  LyrBg,
+  LyrBottom,
+  LyrTop,
+  LyrOverlay,
+  LyrTile,
+  LyrFloat,
+#ifdef IM
+  LyrIMEPopup,
+#endif
+  LyrNoFocus,
+  NUM_LAYERS }; /* scene layers */
 #ifdef XWAYLAND
 enum { NetWMWindowTypeDialog, NetWMWindowTypeSplash, NetWMWindowTypeToolbar,
 	NetWMWindowTypeUtility, NetLast }; /* EWMH atoms */
@@ -204,6 +219,8 @@ typedef struct {
 	int monitor;
 } Rule;
 
+
+#ifdef IM
 /**
  * The relay structure manages the relationship between text-input and
  * input_method interfaces on a given seat. Multiple text-input interfaces may
@@ -275,6 +292,8 @@ struct render_data {
 	struct timespec *when;
 	int x, y; /* layout-relative */
 };
+
+#endif
 
 /* function declarations */
 static void applybounds(Client *c, struct wlr_box *bbox);
@@ -368,6 +387,8 @@ static void virtualkeyboard(struct wl_listener *listener, void *data);
 static Monitor *xytomon(double x, double y);
 static struct wlr_scene_node *xytonode(double x, double y, struct wlr_surface **psurface,
 		Client **pc, LayerSurface **pl, double *nx, double *ny);
+
+#ifdef IM
 void dwl_input_method_relay_init(struct dwl_input_method_relay *relay);
 // Updates currently focused surface. Surface must belong to the same
 // seat.
@@ -378,7 +399,8 @@ struct dwl_text_input *dwl_text_input_create(
 	struct wlr_text_input_v3 *text_input);
 static void handle_im_grab_keyboard(struct wl_listener *listener, void *data);
 static void handle_im_keyboard_grab_destroy(struct wl_listener *listener,
-		void *data);
+                                            void *data);
+#endif
 static void zoom(const Arg *arg);
 
 /* variables */
@@ -407,9 +429,13 @@ static struct wlr_cursor *cursor;
 static struct wlr_xcursor_manager *cursor_mgr;
 
 static struct wlr_seat *seat;
+
+#ifdef IM
 struct wlr_input_method_manager_v2 *input_method_manager;
 struct wlr_text_input_manager_v3 *text_input_manager;
 struct dwl_input_method_relay *input_relay;
+#endif
+
 static struct wl_list keyboards;
 static unsigned int cursor_mode;
 static Client *grabc;
@@ -1248,7 +1274,9 @@ focusclient(Client *c, int lift)
 	if (!c) {
 		/* With no client, all we have left is to clear focus */
 		wlr_seat_keyboard_notify_clear_focus(seat);
-		dwl_input_method_relay_set_focus(input_relay, NULL);
+#ifdef IM
+                dwl_input_method_relay_set_focus(input_relay, NULL);
+#endif
 		return;
 	}
 
@@ -1268,9 +1296,9 @@ focusclient(Client *c, int lift)
 				kb->keycodes, kb->num_keycodes, &kb->modifiers);
 	else
 		wlr_seat_keyboard_notify_enter(seat, client_surface(c), NULL, 0, NULL);
-
+#ifdef IM
 	dwl_input_method_relay_set_focus(input_relay, client_surface(c));
-
+#endif
 	/* Activate the new client */
 	client_activate_surface(client_surface(c), 1);
 }
@@ -1391,6 +1419,7 @@ keybinding(uint32_t mods, xkb_keysym_t sym)
 	return handled;
 }
 
+#ifdef IM
 /**
  * Get keyboard grab of the seat from sway_keyboard if we should forward events
  * to it.
@@ -1410,6 +1439,7 @@ static struct wlr_input_method_keyboard_grab_v2 *keyboard_get_im_grab(Keyboard* 
 	}
 	return input_method->keyboard_grab;
 }
+#endif
 
 void
 keypress(struct wl_listener *listener, void *data)
@@ -1439,7 +1469,8 @@ keypress(struct wl_listener *listener, void *data)
 			handled = keybinding(mods, syms[i]) || handled;
 
 	if (!handled) {
-		/* if there is a keyboard grab, we send the key there */
+#ifdef IM
+	  /* if there is a keyboard grab, we send the key there */
 		struct wlr_input_method_keyboard_grab_v2 *kb_grab = keyboard_get_im_grab(kb);
 		if (kb_grab) {
 			wlr_input_method_keyboard_grab_v2_set_keyboard(kb_grab,
@@ -1448,7 +1479,8 @@ keypress(struct wl_listener *listener, void *data)
 				event->time_msec, event->keycode, event->state);
 			return;
 		}
-
+#endif
+		
 		/* Pass unhandled keycodes along to the client. */
 		wlr_seat_set_keyboard(seat, kb->device);
 		wlr_seat_keyboard_notify_key(seat, event->time_msec,
@@ -1462,13 +1494,14 @@ keypressmod(struct wl_listener *listener, void *data)
 	/* This event is raised when a modifier key, such as shift or alt, is
 	 * pressed. We simply communicate this to the client. */
 	Keyboard *kb = wl_container_of(listener, kb, modifiers);
-	struct wlr_input_method_keyboard_grab_v2 *kb_grab = keyboard_get_im_grab(kb);
+#ifdef IM
+        struct wlr_input_method_keyboard_grab_v2 *kb_grab = keyboard_get_im_grab(kb);
 	if (kb_grab) {
 		wlr_input_method_keyboard_grab_v2_send_modifiers(kb_grab,
 				&kb->device->keyboard->modifiers);
 		return;
 	}
-
+#endif
 	/*
 	 * A seat can only have one keyboard, but this is a limitation of the
 	 * Wayland protocol - not wlroots. We assign all connected keyboards to the
@@ -1549,6 +1582,7 @@ mapnotify(struct wl_listener *listener, void *data)
 	c->mon->un_map = 1;
 }
 
+#ifdef IM
 static void handle_im_grab_keyboard(struct wl_listener *listener, void *data) {
 	struct dwl_input_method_relay *relay = wl_container_of(listener, relay,
 		input_method_grab_keyboard);
@@ -1579,7 +1613,7 @@ static void handle_im_keyboard_grab_destroy(struct wl_listener *listener, void *
 			&keyboard_grab->keyboard->modifiers);
 	}
 }
-
+#endif
 
 void
 monocle(Monitor *m)
@@ -2098,6 +2132,7 @@ setsel(struct wl_listener *listener, void *data)
 	wlr_seat_set_selection(seat, event->source, event->serial);
 }
 
+#ifdef IM
 // text-input-, and input_method-relevant functions
 static struct dwl_text_input *relay_get_focusable_text_input(
 		struct dwl_input_method_relay *relay) {
@@ -2315,6 +2350,7 @@ static void relay_handle_text_input(struct wl_listener *listener,
 
 	dwl_text_input_create(relay, wlr_text_input);
 }
+
 
 static LayerSurface* layer_surface_from_wlr_layer_surface_v1(
 		struct wlr_layer_surface_v1* layer_surface) {
@@ -2568,6 +2604,7 @@ void dwl_input_method_relay_set_focus(struct dwl_input_method_relay *relay,
 		}
 	}
 }
+#endif
 
 void
 setup(void)
@@ -2600,8 +2637,9 @@ setup(void)
 	layers[LyrFloat] = &wlr_scene_tree_create(&scene->node)->node;
 	layers[LyrTop] = &wlr_scene_tree_create(&scene->node)->node;
 	layers[LyrOverlay] = &wlr_scene_tree_create(&scene->node)->node;
+#ifdef IM
         layers[LyrIMEPopup] = &wlr_scene_tree_create(&scene->node)->node;
-	
+#endif
 	layers[LyrNoFocus] = &wlr_scene_tree_create(&scene->node)->node;
 
 	
@@ -2727,12 +2765,14 @@ setup(void)
 
 	wlr_scene_set_presentation(scene, wlr_presentation_create(dpy, backend));
 
+#ifdef IM
 	/* create text_input-, and input_method-protocol relevant globals */
 	input_method_manager = wlr_input_method_manager_v2_create(dpy);
 	text_input_manager = wlr_text_input_manager_v3_create(dpy);
 
 	input_relay = calloc(1, sizeof(*input_relay));
 	dwl_input_method_relay_init(input_relay);
+#endif
 
 #ifdef XWAYLAND
 	/*

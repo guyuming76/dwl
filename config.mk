@@ -10,3 +10,6 @@ CFLAGS ?= -g -Wall -Wextra -Werror -Wno-unused-parameter -Wno-sign-compare -Wno-
 
 # Uncomment to build XWayland support
 #CFLAGS += -DXWAYLAND
+
+# Comment to disable Input Method support(such as CJK)
+CFLAGS += -DIM
