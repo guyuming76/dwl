@@ -58,3 +58,7 @@ https://github.com/djpohly/dwl/issues/224
 https://github.com/fcitx/fcitx5/discussions/481
 
 https://github.com/djpohly/dwl/pull/12
+
+
+
+一些包含截屏的文档记录： https://gitee.com/guyuming76/personal/commits/dwl
