@@ -84,7 +84,7 @@ enum {
   LyrTile,
   LyrFloat,
 #ifdef IM
-  LyrIMEPopup,
+  LyrIMPopup,
 #endif
   LyrNoFocus,
   NUM_LAYERS }; /* scene layers */
@@ -2459,7 +2459,7 @@ static void handle_im_popup_map(struct wl_listener *listener, void *data) {
 	struct dwl_input_popup *popup =
 		wl_container_of(listener, popup, popup_map);
 
-	popup->scene = &wlr_scene_tree_create(layers[LyrIMEPopup])->node;
+	popup->scene = &wlr_scene_tree_create(layers[LyrIMPopup])->node;
 	popup->scene_surface = wlr_scene_subsurface_tree_create(popup->scene,
 			popup->popup_surface->surface);
 	popup->scene_surface->data = popup;
@@ -2629,7 +2629,7 @@ setup(void)
 	layers[LyrTop] = &wlr_scene_tree_create(&scene->node)->node;
 	layers[LyrOverlay] = &wlr_scene_tree_create(&scene->node)->node;
 #ifdef IM
-        layers[LyrIMEPopup] = &wlr_scene_tree_create(&scene->node)->node;
+        layers[LyrIMPopup] = &wlr_scene_tree_create(&scene->node)->node;
 #endif
 	layers[LyrNoFocus] = &wlr_scene_tree_create(&scene->node)->node;
 
