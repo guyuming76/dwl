@@ -235,8 +235,14 @@ static inline Client *
 client_from_wlr_surface(struct wlr_surface *surface)
 {
 	struct wlr_scene_node *n = surface->data;
-	return n ? n->data : NULL;
+// if we search across dwl.c with "alloc(" , we can find the lines where Client
+// is created for surface
+// in both xdg surface and xwayland surface, client = surface->data->data
+// so the commented definition which use surface->role_data->data for client is not correct.
+        return n ? n->data : NULL;
 }
+
+
 
 static inline Client *
 client_from_popup(struct wlr_xdg_popup *popup)

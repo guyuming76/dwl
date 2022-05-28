@@ -2321,9 +2321,6 @@ static LayerSurface* layer_surface_from_wlr_layer_surface_v1(
 	return layer_surface->data;
 }
 
-static Client* client_from_wlr_surface(struct wlr_surface* surface) {
-	return wlr_xdg_surface_from_wlr_surface(surface)->data;
-}
 
 static void get_parent_and_output_box(struct wlr_surface *focused_surface,
 		struct wlr_box *parent, struct wlr_box *output_box) {
