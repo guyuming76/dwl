@@ -2237,7 +2237,9 @@ static void handle_text_input_enable(struct wl_listener *listener, void *data) {
 		wlr_log(WLR_INFO, "Enabling text input when input method is gone");
 		return;
 	}
+#ifdef xwayland
 	wlr_input_method_v2_send_activate(text_input->relay->input_method);
+#endif
 	relay_send_im_state(text_input->relay, text_input->input);
 }
 
@@ -2263,9 +2265,10 @@ static void relay_disable_text_input(struct dwl_input_method_relay *relay,
 		wlr_log(WLR_DEBUG, "Disabling text input, but input method is gone");
 		return;
 	}
-	//TODO:  the following two lines is like magic, i don't understand why but i feel its a workaround instead of a solution here (https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3433)
-	//if i remove the calling to current funtion from the caller dwl_input_method_relay_set_focus， when you switch to a new tag with no client on, the popup from previous tag will still show
+#ifdef xwayland
+	// https://gitee.com/guyuming76/dwl/commit/59328d6ecbbef1b1cd6e5ea8d90d78ccddd5c263
 	wlr_input_method_v2_send_deactivate(relay->input_method);
+#endif
 	//but if you keep the line above while remove the line below, input Chinese in geogebra(xwayland) won't work 
 	relay_send_im_state(relay, text_input->input);
 }
