@@ -1,11 +1,12 @@
 This repository is used for my testing and fixing "text input and input method" PR for DWL and other misc. works related as well:
-=======
+
 
 The command i use to start dwl from tty:
 
 ```
 dbus-run-session dwl -s ~/dwlstart
 ```
+`dbus-run-session dwl -s ~/dwlstart 2>/tmp/dwlerr.log`
 
 
 the content of dwlstart script:
