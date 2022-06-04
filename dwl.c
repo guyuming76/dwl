@@ -3214,11 +3214,15 @@ main(int argc, char *argv[])
 	char *startup_cmd = NULL;
 	int c;
 
-	while ((c = getopt(argc, argv, "s:hv")) != -1) {
+	while ((c = getopt(argc, argv, "s:hvdi")) != -1) {
 		if (c == 's')
 			startup_cmd = optarg;
 		else if (c == 'v')
 			die("dwl " VERSION);
+		else if (c == 'd')
+		        wlr_log_init(WLR_DEBUG, NULL);
+		else if (c == 'i')
+		        wlr_log_init(WLR_INFO, NULL);
 		else
 			goto usage;
 	}

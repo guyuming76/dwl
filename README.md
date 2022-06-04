@@ -9,6 +9,12 @@ dbus-run-session dwl -s ~/dwlstart
 ```
 dbus-run-session dwl -s ~/dwlstart 2>/tmp/dwlerr.log
 ```
+```
+dbus-run-session dwl -s ~/dwlstart -i 2>/tmp/dwlerr.log
+```
+```
+dbus-run-session dwl -s ~/dwlstart -d 2>/tmp/dwlerr.log
+```
 
 
 the content of dwlstart script:
@@ -19,7 +25,10 @@ the content of dwlstart script:
 fname="$HOME"/.cache/dwltags
 
 gentoo-pipewire-launcher &
+
 fcitx5 -d
+#fcitx5 --verbose "*=5" -d
+
 waybar &
 
 while
