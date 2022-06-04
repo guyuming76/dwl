@@ -6,7 +6,9 @@ The command i use to start dwl from tty:
 ```
 dbus-run-session dwl -s ~/dwlstart
 ```
-`dbus-run-session dwl -s ~/dwlstart 2>/tmp/dwlerr.log`
+```
+dbus-run-session dwl -s ~/dwlstart 2>/tmp/dwlerr.log
+```
 
 
 the content of dwlstart script:
