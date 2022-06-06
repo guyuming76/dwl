@@ -27,12 +27,8 @@
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_idle_inhibit_v1.h>
 #include <wlr/types/wlr_input_inhibitor.h>
-#ifdef IM
-#include <wlr/types/wlr_input_method_v2.h>
-#endif
 #include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/types/wlr_keyboard.h>
-#include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_output_management_v1.h>
@@ -44,9 +40,6 @@
 #include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_server_decoration.h>
-#ifdef IM
-#include <wlr/types/wlr_text_input_v3.h>
-#endif
 #include <wlr/types/wlr_viewporter.h>
 #include <wlr/types/wlr_virtual_keyboard_v1.h>
 #include <wlr/types/wlr_xcursor_manager.h>
@@ -56,9 +49,15 @@
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/log.h>
 #include <xkbcommon/xkbcommon.h>
+
 #ifdef XWAYLAND
 #include <X11/Xlib.h>
 #include <wlr/xwayland.h>
+#endif
+
+#ifdef IM
+#include <wlr/types/wlr_text_input_v3.h>
+#include <wlr/types/wlr_input_method_v2.h>
 #endif
 
 #include "util.h"
@@ -1426,7 +1425,11 @@ static struct wlr_input_method_keyboard_grab_v2 *keyboard_get_im_grab(Keyboard* 
 	if (!input_method || !input_method->keyboard_grab || (virtual_keyboard &&
 				wl_resource_get_client(virtual_keyboard->resource) ==
 				wl_resource_get_client(input_method->keyboard_grab->resource))) {
-		return NULL;
+	  if (!input_method) {wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab:no input_method");}
+          if (!input_method->keyboard_grab) {wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab:no input_method->keyboard_grab");}
+          if (virtual_keyboard) {wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab:virtual_keyboard");}     
+
+	  return NULL;
 	}
 	return input_method->keyboard_grab;
 }
@@ -1463,11 +1466,13 @@ keypress(struct wl_listener *listener, void *data)
 #ifdef IM
 	  /* if there is a keyboard grab, we send the key there */
 		struct wlr_input_method_keyboard_grab_v2 *kb_grab = keyboard_get_im_grab(kb);
+		
 		if (kb_grab) {
 			wlr_input_method_keyboard_grab_v2_set_keyboard(kb_grab,
 				kb->device->keyboard);
 			wlr_input_method_keyboard_grab_v2_send_key(kb_grab,
 				event->time_msec, event->keycode, event->state);
+			wlr_log(WLR_DEBUG, "keypress send to IM:%d",event->keycode);
 			return;
 		}
 #endif
@@ -1476,6 +1481,10 @@ keypress(struct wl_listener *listener, void *data)
 		wlr_seat_set_keyboard(seat, kb->device);
 		wlr_seat_keyboard_notify_key(seat, event->time_msec,
 			event->keycode, event->state);
+		wlr_log(WLR_DEBUG, "keypress send to client:%d",event->keycode);
+	}
+	else {
+	  wlr_log(WLR_DEBUG,"keypress handled by dwl:%d",event->keycode);
 	}
 }
 
@@ -1490,6 +1499,7 @@ keypressmod(struct wl_listener *listener, void *data)
 	if (kb_grab) {
 		wlr_input_method_keyboard_grab_v2_send_modifiers(kb_grab,
 				&kb->device->keyboard->modifiers);
+		wlr_log(WLR_DEBUG, "keypressmod send to IM");
 		return;
 	}
 #endif
@@ -1503,6 +1513,7 @@ keypressmod(struct wl_listener *listener, void *data)
 	/* Send modifiers to the client. */
 	wlr_seat_keyboard_notify_modifiers(seat,
 		&kb->device->keyboard->modifiers);
+	wlr_log(WLR_DEBUG, "keypressmod send to client");
 }
 
 void
@@ -1585,6 +1596,8 @@ static void handle_im_grab_keyboard(struct wl_listener *listener, void *data) {
 		active_keyboard);
 	wlr_input_method_keyboard_grab_v2_send_modifiers(keyboard_grab,
 		&active_keyboard->modifiers);
+
+	wlr_log(WLR_DEBUG, "im_grab_keyboard");
 
 	wl_signal_add(&keyboard_grab->events.destroy,
 		&relay->input_method_keyboard_grab_destroy);
@@ -2165,10 +2178,12 @@ static void handle_im_commit(struct wl_listener *listener, void *data) {
 			context->current.preedit.text,
 			context->current.preedit.cursor_begin,
 			context->current.preedit.cursor_end);
+		wlr_log(WLR_DEBUG,"preedit_text: %s", context->current.preedit.text);
 	}
 	if (context->current.commit_text) {
 		wlr_text_input_v3_send_commit_string(text_input->input,
 			context->current.commit_text);
+		wlr_log(WLR_DEBUG,"commit_text: %s", context->current.commit_text);
 	}
 	if (context->current.delete.before_length
 			|| context->current.delete.after_length) {
@@ -2330,6 +2345,8 @@ struct dwl_text_input *dwl_text_input_create(
 	input->pending_focused_surface_destroy.notify =
 		handle_pending_focused_surface_destroy;
 	wl_list_init(&input->pending_focused_surface_destroy.link);
+
+	wlr_log(WLR_DEBUG, "dwl_text_input_create");
 	return input;
 }
 
@@ -2470,6 +2487,8 @@ static void handle_im_popup_map(struct wl_listener *listener, void *data) {
 	input_popup_update(popup);
 
 	wlr_scene_node_set_position(popup->scene, popup->x, popup->y);
+
+	wlr_log(WLR_DEBUG, "IM_popup_map_at_xy:%d,%d ",popup->x,popup->y);
 }
 
 static void handle_im_popup_unmap(struct wl_listener *listener, void *data) {
@@ -2511,6 +2530,8 @@ static void handle_im_new_popup_surface(struct wl_listener *listener, void *data
 	wl_signal_add(
 		&popup->popup_surface->events.destroy, &popup->popup_destroy);
 	popup->popup_destroy.notify = handle_im_popup_destroy;
+
+	_wlr_log(WLR_DEBUG, "IM_new_popup_surface");
 
 }
 
@@ -2581,6 +2602,7 @@ void dwl_input_method_relay_set_focus(struct dwl_input_method_relay *relay,
 			if (surface != text_input->input->focused_surface) {
 				relay_disable_text_input(relay, text_input);
 				wlr_text_input_v3_send_leave(text_input->input);
+				wlr_log(WLR_DEBUG, "wlr_text_input_send_leave");
 			} else {
 				wlr_log(WLR_DEBUG, "IM relay set_focus already focused");
 				continue;
@@ -2592,6 +2614,7 @@ void dwl_input_method_relay_set_focus(struct dwl_input_method_relay *relay,
 				== wl_resource_get_client(surface->resource)) {
 			if (relay->input_method) {
 				wlr_text_input_v3_send_enter(text_input->input, surface);
+				wlr_log(WLR_DEBUG, "wlr_text_input_send_enter");
 			} else {
 				text_input_set_pending_focused_surface(text_input, surface);
 			}
