@@ -1425,9 +1425,15 @@ static struct wlr_input_method_keyboard_grab_v2 *keyboard_get_im_grab(Keyboard* 
 	if (!input_method || !input_method->keyboard_grab || (virtual_keyboard &&
 				wl_resource_get_client(virtual_keyboard->resource) ==
 				wl_resource_get_client(input_method->keyboard_grab->resource))) {
-	  if (!input_method) {wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab:no input_method");}
-          if (!input_method->keyboard_grab) {wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab:no input_method->keyboard_grab");}
-          if (virtual_keyboard) {wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab:virtual_keyboard");}     
+	  if (!input_method){
+	    wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab:no input_method");
+	  } else if (!input_method->keyboard_grab){
+	    wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab:no input_method->keyboard_grab");
+	  }
+
+	  if (virtual_keyboard) {
+	    wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab:virtual_keyboard");
+	  }     
 
 	  return NULL;
 	}
