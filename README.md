@@ -4,16 +4,16 @@ This repository is used for my testing and fixing "text input and input method" 
 The command i use to start dwl from tty:
 
 ```
-dbus-run-session dwl -s ~/dwlstart
+dbus-run-session dwl -s ~/dwlstart.sh
 ```
 ```
-dbus-run-session dwl -s ~/dwlstart 2>/tmp/dwlerr.log
+dbus-run-session dwl -s ~/dwlstart.sh 2>/tmp/dwlerr.log
 ```
 ```
-dbus-run-session dwl -s ~/dwlstart -i 2>/tmp/dwlerr.log
+dbus-run-session dwl -s ~/dwlstart.sh -i 2>/tmp/dwlerr.log
 ```
 ```
-dbus-run-session dwl -s ~/dwlstart -d 2>/tmp/dwlerr.log
+dbus-run-session dwl -s ~/dwlstart.sh -d 2>/tmp/dwlerr.log
 ```
 
 
@@ -42,6 +42,12 @@ done
 i put waybar related scripts in the following link, i think better way to clean the ~/.cache/dwltags file should be provided.
 
 https://gitee.com/guyuming76/personal/tree/dwl/gentoo/waybar-dwl
+
+1. copy the config and style.css files to override the waybar defaults, in my case, /etc/xdg/waybar/config  /etc/xdg/waybar/style.css
+2. copy waybar-dwl.sh to ~/waybar-dwl.sh, which is referenced in the config file above
+3. copy dwlstart.sh to ~/dwlstart.sh and modify it as you need, waybar is started in it
+
+run dbus-run-session dwl -s ~/dwlstart.sh to start dwl. you might find that the current selected tag for waybar is not highlighted, you can run ~/.cache/dwltags, the first column contains the name of your monitor. Then you can edit the waybar-dwl.sh, find the monitor= line and assign it with your monitor name.
 
 -------------------------------------------------------------------------------------------
 
