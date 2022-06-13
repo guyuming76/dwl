@@ -1109,6 +1109,9 @@ createpointer(struct wlr_input_device *device)
 
 		if (libinput_device_config_scroll_get_methods(libinput_device) != LIBINPUT_CONFIG_SCROLL_NO_SCROLL)
 			libinput_device_config_scroll_set_method (libinput_device, scroll_method);
+		
+		 if (libinput_device_config_click_get_methods(libinput_device) != LIBINPUT_CONFIG_CLICK_METHOD_NONE)
+                        libinput_device_config_click_set_method (libinput_device, click_method);
 
 		if (libinput_device_config_send_events_get_modes(libinput_device))
 			libinput_device_config_send_events_set_mode(libinput_device, send_events_mode);
@@ -2958,7 +2961,8 @@ toggleview(const Arg *arg)
 void
 unmaplayersurface(LayerSurface *layersurface)
 {
-	layersurface->layer_surface->mapped = 0;
+	layersurface->layer_surface->mapped = (layersurface->mapped = 0);
+	wlr_scene_node_set_enabled(layersurface->scene, 0);
 	if (layersurface->layer_surface->surface ==
 			seat->keyboard_state.focused_surface)
 		focusclient(selclient(), 1);
