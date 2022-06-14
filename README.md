@@ -20,7 +20,12 @@ fname="$HOME"/.cache/dwltags
 
 gentoo-pipewire-launcher &
 
-fcitx5 -d
+#fcitx5 -d
+fcitx5 -d --disable dbus
+#https://github.com/fcitx/fcitx5/discussions/523
+#in /etc/environment, i have GTK_IM_MODULE="wayland"
+#and in .xinitrc, i have export GTK_IM_MODULE="fcitx"
+
 #fcitx5 --verbose "*=5" -d
 
 waybar &
