@@ -1601,11 +1601,13 @@ static void handle_im_grab_keyboard(struct wl_listener *listener, void *data) {
 
 	// send modifier state to grab
 	struct wlr_keyboard *active_keyboard = wlr_seat_get_keyboard(seat);
-	wlr_input_method_keyboard_grab_v2_set_keyboard(keyboard_grab,
-		active_keyboard);
-	wlr_input_method_keyboard_grab_v2_send_modifiers(keyboard_grab,
-		&active_keyboard->modifiers);
-
+        if (active_keyboard){
+	       wlr_input_method_keyboard_grab_v2_set_keyboard(keyboard_grab,active_keyboard);
+               if (&(active_keyboard->modifiers)) {
+	                wlr_input_method_keyboard_grab_v2_send_modifiers(keyboard_grab,
+		                                             &active_keyboard->modifiers);
+	       }
+	}
 	wlr_log(WLR_DEBUG, "im_grab_keyboard");
 
 	wl_signal_add(&keyboard_grab->events.destroy,
