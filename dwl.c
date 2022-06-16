@@ -1433,13 +1433,13 @@ static struct wlr_input_method_keyboard_grab_v2 *keyboard_get_im_grab(Keyboard* 
 				wl_resource_get_client(virtual_keyboard->resource) ==
 				wl_resource_get_client(input_method->keyboard_grab->resource))) {
 	  if (!input_method){
-	    wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab:no input_method");
+	    wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab return NULL:no input_method");
 	  } else if (!input_method->keyboard_grab){
-	    wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab:no input_method->keyboard_grab");
+	    wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab return NULL:no input_method->keyboard_grab");
 	  }
 
 	  if (virtual_keyboard) {
-	    wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab:virtual_keyboard");
+	    wlr_log(WLR_DEBUG, "keypress keyboard_get_im_grab return NULL:virtual_keyboard");
 	  }     
 
 	  return NULL;
@@ -1474,6 +1474,8 @@ keypress(struct wl_listener *listener, void *data)
 			&& event->state == WL_KEYBOARD_KEY_STATE_PRESSED)
 		for (i = 0; i < nsyms; i++)
 			handled = keybinding(mods, syms[i]) || handled;
+	else if (input_inhibit_mgr->active_inhibitor)
+	  {wlr_log(WLR_INFO,"keypress with active_inhibitor keycode %u mods %u",event->keycode, mods);}
 
 	if (!handled) {
 #ifdef IM
@@ -1485,7 +1487,7 @@ keypress(struct wl_listener *listener, void *data)
 				kb->device->keyboard);
 			wlr_input_method_keyboard_grab_v2_send_key(kb_grab,
 				event->time_msec, event->keycode, event->state);
-			wlr_log(WLR_DEBUG, "keypress send to IM:%d",event->keycode);
+			wlr_log(WLR_DEBUG, "keypress send to IM:%u mods %u state %u",event->keycode, mods,event->state);
 			return;
 		}
 #endif
@@ -1494,10 +1496,10 @@ keypress(struct wl_listener *listener, void *data)
 		wlr_seat_set_keyboard(seat, kb->device);
 		wlr_seat_keyboard_notify_key(seat, event->time_msec,
 			event->keycode, event->state);
-		wlr_log(WLR_DEBUG, "keypress send to client:%d",event->keycode);
+		wlr_log(WLR_DEBUG, "keypress send to client:%u mods %u state %u",event->keycode,mods,event->state);
 	}
 	else {
-	  wlr_log(WLR_DEBUG,"keypress handled by dwl:%d",event->keycode);
+	  wlr_log(WLR_DEBUG,"keypress handled by dwl:%u mods %u state %u",event->keycode,mods,event->state);
 	}
 }
 
@@ -1858,20 +1860,28 @@ printstatus(void)
 		}
 		if ((c = focustop(m))) {
 			printf("%s title %s\n", m->wlr_output->name, client_get_title(c));
+                        wlr_log(WLR_DEBUG,"%s title %s", m->wlr_output->name, client_get_title(c));
 			printf("%s fullscreen %u\n", m->wlr_output->name, c->isfullscreen);
+			wlr_log(WLR_DEBUG,"%s fullscreen %u", m->wlr_output->name, c->isfullscreen);
 			printf("%s floating %u\n", m->wlr_output->name, c->isfloating);
+			wlr_log(WLR_DEBUG,"%s floating %u", m->wlr_output->name, c->isfloating);
 			sel = c->tags;
 		} else {
 			printf("%s title \n", m->wlr_output->name);
+			wlr_log(WLR_DEBUG,"%s title ", m->wlr_output->name);
 			printf("%s fullscreen \n", m->wlr_output->name);
+			wlr_log(WLR_DEBUG,"%s fullscreen ", m->wlr_output->name);
 			printf("%s floating \n", m->wlr_output->name);
+			wlr_log(WLR_DEBUG,"%s floating ", m->wlr_output->name);
 			sel = 0;
 		}
 
 		printf("%s selmon %u\n", m->wlr_output->name, m == selmon);
-		printf("%s tags %u %u %u %u\n", m->wlr_output->name, occ, m->tagset[m->seltags],
-				sel, urg);
+		wlr_log(WLR_DEBUG,"%s selmon %u", m->wlr_output->name, m == selmon);
+		printf("%s tags %u %u %u %u\n", m->wlr_output->name, occ, m->tagset[m->seltags],sel, urg);
+		wlr_log(WLR_DEBUG,"%s tags %u %u %u %u", m->wlr_output->name, occ, m->tagset[m->seltags],sel, urg);
 		printf("%s layout %s\n", m->wlr_output->name, m->lt[m->sellt]->symbol);
+		wlr_log(WLR_DEBUG,"%s layout %s", m->wlr_output->name, m->lt[m->sellt]->symbol);
 	}
 	fflush(stdout);
 }
