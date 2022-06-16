@@ -1609,12 +1609,12 @@ static void handle_im_grab_keyboard(struct wl_listener *listener, void *data) {
 	struct wlr_keyboard *active_keyboard = wlr_seat_get_keyboard(seat);
         if (active_keyboard){
 	       wlr_input_method_keyboard_grab_v2_set_keyboard(keyboard_grab,active_keyboard);
-               if (&(active_keyboard->modifiers)) {
-	                wlr_input_method_keyboard_grab_v2_send_modifiers(keyboard_grab,
-		                                             &active_keyboard->modifiers);
-	       }
+               wlr_input_method_keyboard_grab_v2_send_modifiers(keyboard_grab, &active_keyboard->modifiers);
+	       wlr_log(WLR_DEBUG,"im_grab_keyboard");
 	}
-	wlr_log(WLR_DEBUG, "im_grab_keyboard");
+        else
+	       wlr_log(WLR_DEBUG,"im_grab_keyboard but no active keyboard");
+		       
 
 	wl_signal_add(&keyboard_grab->events.destroy,
 		&relay->input_method_keyboard_grab_destroy);
