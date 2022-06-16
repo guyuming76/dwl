@@ -2270,12 +2270,12 @@ static void handle_text_input_enable(struct wl_listener *listener, void *data) {
 		wlr_log(WLR_INFO, "Enabling text input when input method is gone");
 		return;
 	}
-
-	wlr_input_method_v2_send_activate(text_input->relay->input_method);
-
-	relay_send_im_state(text_input->relay, text_input->input);
-
 	wlr_log(WLR_DEBUG,"text_input_enable");
+	
+#ifdef XWAYLAND
+	wlr_input_method_v2_send_activate(text_input->relay->input_method);
+#endif
+	relay_send_im_state(text_input->relay, text_input->input);
 }
 
 static void handle_text_input_commit(struct wl_listener *listener,
@@ -2300,13 +2300,14 @@ static void relay_disable_text_input(struct dwl_input_method_relay *relay,
 		wlr_log(WLR_DEBUG, "Disabling text input, but input method is gone");
 		return;
 	}
+        wlr_log(WLR_DEBUG,"text_input_disable");
+	
 #ifdef XWAYLAND
 	// https://gitee.com/guyuming76/dwl/commit/59328d6ecbbef1b1cd6e5ea8d90d78ccddd5c263
 	wlr_input_method_v2_send_deactivate(relay->input_method);
 #endif
 	//but if you keep the line above while remove the line below, input Chinese in geogebra(xwayland) won't work 
 	relay_send_im_state(relay, text_input->input);
-	wlr_log(WLR_DEBUG,"text_input_disable");
 }
 
 
@@ -2588,6 +2589,9 @@ static void relay_handle_input_method(struct wl_listener *listener,
 	wl_signal_add(&relay->input_method->events.destroy,
 		&relay->input_method_destroy);
 	relay->input_method_destroy.notify = handle_im_destroy;
+
+        wlr_log(WLR_DEBUG,"input_method_new");
+        wlr_input_method_v2_send_activate(relay->input_method);
 
 	text_input = relay_get_focusable_text_input(relay);
 	if (text_input) {
