@@ -236,6 +236,8 @@ struct dwl_input_method_relay {
 	struct wl_list text_inputs; // dwl_text_input::link
 	struct wlr_input_method_v2 *input_method; // doesn't have to be present
 
+        struct dwl_input_popup *popup;
+
 	struct wl_listener text_input_new;
 
 	struct wl_listener input_method_new;
@@ -2501,6 +2503,7 @@ static void input_popup_update(struct dwl_input_popup *popup) {
 	popup->visible =
 		(x1_in_bounds && y1_in_bounds) || (x2_in_bounds && y2_in_bounds);
 
+        
 	if (cursor_rect) {
 		struct wlr_box box = {
 			.x = x1 - x,
@@ -2510,7 +2513,11 @@ static void input_popup_update(struct dwl_input_popup *popup) {
 		};
 		wlr_input_popup_surface_v2_send_text_input_rectangle(
 			popup->popup_surface, &box);
+		wlr_log(WLR_DEBUG,"input_popup_update send_text_input_rect box.x %d box.y %d",box.x,box.y);
 	}
+	
+        wlr_log(WLR_DEBUG,"input_popup_update x %d y %d visible %s",popup->x,popup->y,popup->visible?"true":"false");
+	wlr_scene_node_set_position(popup->scene, popup->x, popup->y);
 }
 
 static void handle_im_popup_map(struct wl_listener *listener, void *data) {
@@ -2524,30 +2531,33 @@ static void handle_im_popup_map(struct wl_listener *listener, void *data) {
 
 	input_popup_update(popup);
 
-	wlr_scene_node_set_position(popup->scene, popup->x, popup->y);
+	//wlr_scene_node_set_position(popup->scene, popup->x, popup->y);
 
-	wlr_log(WLR_DEBUG, "IM_popup_map_at_xy:%d,%d ",popup->x,popup->y);
+	wlr_log(WLR_DEBUG, "IM_popup_map");
 }
 
 static void handle_im_popup_unmap(struct wl_listener *listener, void *data) {
-	struct dwl_input_popup *popup =
+        struct dwl_input_popup *popup =
 		wl_container_of(listener, popup, popup_unmap);
 	//input_popup_update(popup);
 
 	wlr_scene_node_destroy(popup->scene);
-	free(popup);
 	wlr_log(WLR_DEBUG,"im_popup_unmap");
 }
 
 static void handle_im_popup_destroy(struct wl_listener *listener, void *data) {
-	struct dwl_input_popup *popup =
+        struct dwl_input_method_relay *relay;
+        struct dwl_input_popup *popup =
 		wl_container_of(listener, popup, popup_destroy);
 	wl_list_remove(&popup->popup_destroy.link);
 	wl_list_remove(&popup->popup_unmap.link);
 	wl_list_remove(&popup->popup_map.link);
 
+	relay=popup->relay;
+	free(popup->relay->popup);
+	relay->popup=NULL;
+
 	wlr_log(WLR_DEBUG,"im_popup_destroy");
-	//free(popup);
 }
 
 
@@ -2557,6 +2567,8 @@ static void handle_im_new_popup_surface(struct wl_listener *listener, void *data
 	struct dwl_input_method_relay *relay = wl_container_of(listener, relay,
 		input_method_new_popup_surface);
 	struct dwl_input_popup *popup = calloc(1, sizeof(*popup));
+	relay->popup = popup;
+	
 	popup->relay = relay;
 	popup->popup_surface = data;
 	popup->popup_surface->data = popup;
@@ -2624,6 +2636,8 @@ static void relay_handle_input_method(struct wl_listener *listener,
 void dwl_input_method_relay_init(struct dwl_input_method_relay *relay) {
 	wl_list_init(&relay->text_inputs);
 
+	relay->popup=NULL;
+
 	relay->text_input_new.notify = relay_handle_text_input;
 	wl_signal_add(&text_input_manager->events.text_input,
 		&relay->text_input_new);
@@ -2660,6 +2674,7 @@ void dwl_input_method_relay_set_focus(struct dwl_input_method_relay *relay,
 			if (relay->input_method) {
 				wlr_text_input_v3_send_enter(text_input->input, surface);
 				wlr_log(WLR_DEBUG, "wlr_text_input_send_enter");
+                                if (relay->popup) input_popup_update(relay->popup);
 			} else {
 				text_input_set_pending_focused_surface(text_input, surface);
 			}
