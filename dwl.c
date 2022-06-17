@@ -2534,6 +2534,8 @@ static void handle_im_popup_unmap(struct wl_listener *listener, void *data) {
 	//input_popup_update(popup);
 
 	wlr_scene_node_destroy(popup->scene);
+	free(popup);
+	wlr_log(WLR_DEBUG,"im_popup_unmap");
 }
 
 static void handle_im_popup_destroy(struct wl_listener *listener, void *data) {
@@ -2542,7 +2544,9 @@ static void handle_im_popup_destroy(struct wl_listener *listener, void *data) {
 	wl_list_remove(&popup->popup_destroy.link);
 	wl_list_remove(&popup->popup_unmap.link);
 	wl_list_remove(&popup->popup_map.link);
-	free(popup);
+
+	wlr_log(WLR_DEBUG,"im_popup_destroy");
+	//free(popup);
 }
 
 
@@ -2568,7 +2572,7 @@ static void handle_im_new_popup_surface(struct wl_listener *listener, void *data
 		&popup->popup_surface->events.destroy, &popup->popup_destroy);
 	popup->popup_destroy.notify = handle_im_popup_destroy;
 
-	_wlr_log(WLR_DEBUG, "IM_new_popup_surface");
+	wlr_log(WLR_DEBUG, "IM_new_popup_surface");
 
 }
 
