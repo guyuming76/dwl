@@ -980,7 +980,7 @@ createlayersurface(struct wl_listener *listener, void *data)
 	arrangelayers(m);
 	wlr_layer_surface->current = old_state;
 
-	wlr_log(WLR_DEBUG,"createlayersurface");
+	wlr_log(WLR_INFO,"createlayersurface");
 }
 
 void
@@ -1027,7 +1027,7 @@ createmon(struct wl_listener *listener, void *data)
 		return;
 
 	wl_list_insert(&mons, &m->link);
-        wlr_log(WLR_DEBUG,"createmon");
+        wlr_log(WLR_INFO,"createmon");
 	printstatus();
 
 	/* Adds this to the output layout in the order it was configured in.
@@ -1064,7 +1064,7 @@ createnotify(struct wl_listener *listener, void *data)
 	if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_POPUP) {
 		struct wlr_box box;
 
-		wlr_log(WLR_DEBUG,"createnotify WLR_XDG_SURFACE_ROLE_POPUP");
+		wlr_log(WLR_INFO,"createnotify WLR_XDG_SURFACE_ROLE_POPUP");
 		xdg_surface->surface->data = wlr_scene_xdg_surface_create(
 				xdg_surface->popup->parent->data, xdg_surface);
 		if (!(c = client_from_popup(xdg_surface->popup)) || !c->mon)
@@ -1075,13 +1075,13 @@ createnotify(struct wl_listener *listener, void *data)
 		wlr_xdg_popup_unconstrain_from_box(xdg_surface->popup, &box);
 		return;
 	} else if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_NONE){
-	        wlr_log(WLR_DEBUG,"createnotify WLR_XDG_SURFACE_ROLE_NONE"); 
+	        wlr_log(WLR_INFO,"createnotify WLR_XDG_SURFACE_ROLE_NONE"); 
 		return;
 	}
 
 
 	/* Allocate a Client for this surface */
-	wlr_log(WLR_DEBUG,"createnotify new client");
+	wlr_log(WLR_INFO,"createnotify new client");
 	c = xdg_surface->data = ecalloc(1, sizeof(*c));
 	c->surface.xdg = xdg_surface;
 	c->bw = borderpx;
@@ -1602,7 +1602,7 @@ mapnotify(struct wl_listener *listener, void *data)
 	/* Set initial monitor, tags, floating status, and focus */
 	applyrules(c);
 
-        wlr_log(WLR_DEBUG,"mapnotify");
+        wlr_log(WLR_INFO,"mapnotify");
 	printstatus();
 
 	if (c->isfullscreen)
@@ -1622,10 +1622,10 @@ static void handle_im_grab_keyboard(struct wl_listener *listener, void *data) {
         if (active_keyboard){
 	       wlr_input_method_keyboard_grab_v2_set_keyboard(keyboard_grab,active_keyboard);
                wlr_input_method_keyboard_grab_v2_send_modifiers(keyboard_grab, &active_keyboard->modifiers);
-	       wlr_log(WLR_DEBUG,"im_grab_keyboard");
+	       wlr_log(WLR_INFO,"im_grab_keyboard");
 	}
         else
-	       wlr_log(WLR_DEBUG,"im_grab_keyboard but no active keyboard");
+	       wlr_log(WLR_INFO,"im_grab_keyboard but no active keyboard");
 		       
 
 	wl_signal_add(&keyboard_grab->events.destroy,
@@ -1659,7 +1659,7 @@ monocle(Monitor *m)
 			continue;
 		resize(c, m->w.x, m->w.y, m->w.width, m->w.height, 0);
 	}
-	wlr_log(WLR_DEBUG,"monocle");
+	wlr_log(WLR_INFO,"monocle");
 	focusclient(focustop(m), 1);
 }
 
@@ -1874,28 +1874,28 @@ printstatus(void)
 		}
 		if ((c = focustop(m))) {
 			printf("%s title %s\n", m->wlr_output->name, client_get_title(c));
-                        wlr_log(WLR_DEBUG,"%s title %s", m->wlr_output->name, client_get_title(c));
+                        wlr_log(WLR_INFO,"%s title %s", m->wlr_output->name, client_get_title(c));
 			printf("%s fullscreen %u\n", m->wlr_output->name, c->isfullscreen);
-			wlr_log(WLR_DEBUG,"%s fullscreen %u", m->wlr_output->name, c->isfullscreen);
+			wlr_log(WLR_INFO,"%s fullscreen %u", m->wlr_output->name, c->isfullscreen);
 			printf("%s floating %u\n", m->wlr_output->name, c->isfloating);
-			wlr_log(WLR_DEBUG,"%s floating %u", m->wlr_output->name, c->isfloating);
+			wlr_log(WLR_INFO,"%s floating %u", m->wlr_output->name, c->isfloating);
 			sel = c->tags;
 		} else {
 			printf("%s title \n", m->wlr_output->name);
-			wlr_log(WLR_DEBUG,"%s title ", m->wlr_output->name);
+			wlr_log(WLR_INFO,"%s title ", m->wlr_output->name);
 			printf("%s fullscreen \n", m->wlr_output->name);
-			wlr_log(WLR_DEBUG,"%s fullscreen ", m->wlr_output->name);
+			wlr_log(WLR_INFO,"%s fullscreen ", m->wlr_output->name);
 			printf("%s floating \n", m->wlr_output->name);
-			wlr_log(WLR_DEBUG,"%s floating ", m->wlr_output->name);
+			wlr_log(WLR_INFO,"%s floating ", m->wlr_output->name);
 			sel = 0;
 		}
 
 		printf("%s selmon %u\n", m->wlr_output->name, m == selmon);
-		wlr_log(WLR_DEBUG,"%s selmon %u", m->wlr_output->name, m == selmon);
+		wlr_log(WLR_INFO,"%s selmon %u", m->wlr_output->name, m == selmon);
 		printf("%s tags %u %u %u %u\n", m->wlr_output->name, occ, m->tagset[m->seltags],sel, urg);
-		wlr_log(WLR_DEBUG,"%s tags %u %u %u %u", m->wlr_output->name, occ, m->tagset[m->seltags],sel, urg);
+		wlr_log(WLR_INFO,"%s tags %u %u %u %u", m->wlr_output->name, occ, m->tagset[m->seltags],sel, urg);
 		printf("%s layout %s\n", m->wlr_output->name, m->lt[m->sellt]->symbol);
-		wlr_log(WLR_DEBUG,"%s layout %s", m->wlr_output->name, m->lt[m->sellt]->symbol);
+		wlr_log(WLR_INFO,"%s layout %s", m->wlr_output->name, m->lt[m->sellt]->symbol);
 	}
 	fflush(stdout);
 }
@@ -2073,7 +2073,7 @@ setfloating(Client *c, int floating)
 	c->isfloating = floating;
 	wlr_scene_node_reparent(c->scene, layers[c->isfloating ? LyrFloat : LyrTile]);
 	arrange(c->mon);
-	wlr_log(WLR_DEBUG,"setfloating %d",floating);
+	wlr_log(WLR_INFO,"setfloating %d",floating);
 	printstatus();
 }
 
@@ -2093,7 +2093,7 @@ setfullscreen(Client *c, int fullscreen)
 		resize(c, c->prev.x, c->prev.y, c->prev.width, c->prev.height, 0);
 	}
 	arrange(c->mon);
-	wlr_log(WLR_DEBUG,"setfullscreen %d",fullscreen);
+	wlr_log(WLR_INFO,"setfullscreen %d",fullscreen);
 	printstatus();
 }
 
@@ -2106,7 +2106,7 @@ setlayout(const Arg *arg)
 		selmon->lt[selmon->sellt] = (Layout *)arg->v;
 	/* TODO change layout symbol? */
 	arrange(selmon);
-	wlr_log(WLR_DEBUG,"setlayout");
+	wlr_log(WLR_INFO,"setlayout");
 	printstatus();
 }
 
@@ -2259,6 +2259,7 @@ static void handle_im_destroy(struct wl_listener *listener, void *data) {
 			text_input->input->focused_surface);
 		wlr_text_input_v3_send_leave(text_input->input);
 	}
+	wlr_log(WLR_INFO,"IM destroy");
 }
 
 static void relay_send_im_state(struct dwl_input_method_relay *relay,
@@ -2284,14 +2285,16 @@ static void handle_text_input_enable(struct wl_listener *listener, void *data) {
 	struct dwl_text_input *text_input = wl_container_of(listener, text_input,
 		text_input_enable);
 	if (text_input->relay->input_method == NULL) {
-		wlr_log(WLR_INFO, "Enabling text input when input method is gone");
+		wlr_log(WLR_INFO, "text_input_enable but input method is NULL");
 		return;
 	}
-	wlr_log(WLR_DEBUG,"text_input_enable");
-	
+
+        wlr_log(WLR_INFO,"text_input_enable");
 #ifdef XWAYLAND
 	wlr_input_method_v2_send_activate(text_input->relay->input_method);
+	wlr_log(WLR_INFO,"input_method activate for xwayland");
 #endif
+
 	relay_send_im_state(text_input->relay, text_input->input);
 }
 
@@ -2300,28 +2303,29 @@ static void handle_text_input_commit(struct wl_listener *listener,
 	struct dwl_text_input *text_input = wl_container_of(listener, text_input,
 		text_input_commit);
 	if (!text_input->input->current_enabled) {
-		wlr_log(WLR_INFO, "Inactive text input tried to commit an update");
+		wlr_log(WLR_INFO, "text_input_commit but not enabled");
 		return;
 	}
-	wlr_log(WLR_DEBUG, "Text input committed update");
 	if (text_input->relay->input_method == NULL) {
-		wlr_log(WLR_INFO, "Text input committed, but input method is gone");
+		wlr_log(WLR_INFO, "text_input_commit but input method is NULL");
 		return;
 	}
+	wlr_log(WLR_INFO, "text_input_commit");
 	relay_send_im_state(text_input->relay, text_input->input);
 }
 
 static void relay_disable_text_input(struct dwl_input_method_relay *relay,
 		struct dwl_text_input *text_input) {
 	if (relay->input_method == NULL) {
-		wlr_log(WLR_DEBUG, "Disabling text input, but input method is gone");
+		wlr_log(WLR_INFO, "text_input_disable, but input method is NULL");
 		return;
 	}
-        wlr_log(WLR_DEBUG,"text_input_disable");
+        wlr_log(WLR_INFO,"text_input_disable");
 	
 #ifdef XWAYLAND
 	// https://gitee.com/guyuming76/dwl/commit/59328d6ecbbef1b1cd6e5ea8d90d78ccddd5c263
 	wlr_input_method_v2_send_deactivate(relay->input_method);
+	wlr_log(WLR_INFO,"input_method deactivate for xwayland");
 #endif
 	//but if you keep the line above while remove the line below, input Chinese in geogebra(xwayland) won't work 
 	relay_send_im_state(relay, text_input->input);
@@ -2334,9 +2338,13 @@ static void handle_text_input_destroy(struct wl_listener *listener,
 		text_input_destroy);
 
 	if (text_input->input->current_enabled) {
-	    wlr_log(WLR_INFO,"text_input is still enabled when destroy");
+	    wlr_log(WLR_INFO,"text_input_destroy when still enabled");
 	    relay_disable_text_input(text_input->relay, text_input);
 	}
+	else {
+	    wlr_log(WLR_INFO,"text_input_destroy");
+        }
+	
 	text_input_set_pending_focused_surface(text_input, NULL);
 	wl_list_remove(&text_input->text_input_commit.link);
 	wl_list_remove(&text_input->text_input_destroy.link);
@@ -2386,7 +2394,7 @@ struct dwl_text_input *dwl_text_input_create(
 		handle_pending_focused_surface_destroy;
 	wl_list_init(&input->pending_focused_surface_destroy.link);
 
-	wlr_log(WLR_DEBUG, "dwl_text_input_create");
+	wlr_log(WLR_INFO, "dwl_text_input_create");
 	return input;
 }
 
@@ -2513,10 +2521,10 @@ static void input_popup_update(struct dwl_input_popup *popup) {
 		};
 		wlr_input_popup_surface_v2_send_text_input_rectangle(
 			popup->popup_surface, &box);
-		wlr_log(WLR_DEBUG,"input_popup_update send_text_input_rect box.x %d box.y %d",box.x,box.y);
+		wlr_log(WLR_INFO,"input_popup_update send_text_input_rect box.x %d box.y %d",box.x,box.y);
 	}
 	
-        wlr_log(WLR_DEBUG,"input_popup_update x %d y %d visible %s",popup->x,popup->y,popup->visible?"true":"false");
+        wlr_log(WLR_INFO,"input_popup_update x %d y %d visible %s",popup->x,popup->y,popup->visible?"true":"false");
 	wlr_scene_node_set_position(popup->scene, popup->x, popup->y);
 }
 
@@ -2533,7 +2541,7 @@ static void handle_im_popup_map(struct wl_listener *listener, void *data) {
 
 	//wlr_scene_node_set_position(popup->scene, popup->x, popup->y);
 
-	wlr_log(WLR_DEBUG, "IM_popup_map");
+	wlr_log(WLR_INFO, "IM_popup_map");
 }
 
 static void handle_im_popup_unmap(struct wl_listener *listener, void *data) {
@@ -2542,7 +2550,7 @@ static void handle_im_popup_unmap(struct wl_listener *listener, void *data) {
 	//input_popup_update(popup);
 
 	wlr_scene_node_destroy(popup->scene);
-	wlr_log(WLR_DEBUG,"im_popup_unmap");
+	wlr_log(WLR_INFO,"im_popup_unmap");
 }
 
 static void handle_im_popup_destroy(struct wl_listener *listener, void *data) {
@@ -2557,7 +2565,7 @@ static void handle_im_popup_destroy(struct wl_listener *listener, void *data) {
 	free(popup->relay->popup);
 	relay->popup=NULL;
 
-	wlr_log(WLR_DEBUG,"im_popup_destroy");
+	wlr_log(WLR_INFO,"im_popup_destroy");
 }
 
 
@@ -2585,7 +2593,7 @@ static void handle_im_new_popup_surface(struct wl_listener *listener, void *data
 		&popup->popup_surface->events.destroy, &popup->popup_destroy);
 	popup->popup_destroy.notify = handle_im_popup_destroy;
 
-	wlr_log(WLR_DEBUG, "IM_new_popup_surface");
+	wlr_log(WLR_INFO, "IM_new_popup_surface");
 
 }
 
@@ -2622,7 +2630,7 @@ static void relay_handle_input_method(struct wl_listener *listener,
 		&relay->input_method_destroy);
 	relay->input_method_destroy.notify = handle_im_destroy;
 
-        wlr_log(WLR_DEBUG,"input_method_new");
+        wlr_log(WLR_INFO,"input_method_new");
         wlr_input_method_v2_send_activate(relay->input_method);
 
 	text_input = relay_get_focusable_text_input(relay);
@@ -2661,9 +2669,9 @@ void dwl_input_method_relay_set_focus(struct dwl_input_method_relay *relay,
 			if (surface != text_input->input->focused_surface) {
 				relay_disable_text_input(relay, text_input);
 				wlr_text_input_v3_send_leave(text_input->input);
-				wlr_log(WLR_DEBUG, "wlr_text_input_send_leave");
+				wlr_log(WLR_INFO, "wlr_text_input_send_leave");
 			} else {
-				wlr_log(WLR_DEBUG, "IM relay set_focus already focused");
+				wlr_log(WLR_INFO, "IM relay set_focus already focused");
 				continue;
 			}
 		}
@@ -2673,7 +2681,7 @@ void dwl_input_method_relay_set_focus(struct dwl_input_method_relay *relay,
 				== wl_resource_get_client(surface->resource)) {
 			if (relay->input_method) {
 				wlr_text_input_v3_send_enter(text_input->input, surface);
-				wlr_log(WLR_DEBUG, "wlr_text_input_send_enter");
+				wlr_log(WLR_INFO, "wlr_text_input_send_enter");
                                 if (relay->popup) input_popup_update(relay->popup);
 			} else {
 				text_input_set_pending_focused_surface(text_input, surface);
@@ -2915,11 +2923,11 @@ tag(const Arg *arg)
 	if (sel && arg->ui & TAGMASK) {
 		sel->tags = arg->ui & TAGMASK;
 		focusclient(focustop(selmon), 1);
-		wlr_log(WLR_DEBUG,"tag sel->tags %u",sel->tags);
+		wlr_log(WLR_INFO,"tag sel->tags %u",sel->tags);
 		arrange(selmon);
 	}
 	else {
-	  wlr_log(WLR_DEBUG,"tag");
+	  wlr_log(WLR_INFO,"tag");
         }
 	printstatus();
 }
@@ -2951,7 +2959,7 @@ tile(Monitor *m)
 		mw = m->w.width;
 	i = my = ty = 0;
 
-        wlr_log(WLR_DEBUG,"tile");
+        wlr_log(WLR_INFO,"tile");
 	
 	wl_list_for_each(c, &clients, link) {
 		if (!VISIBLEON(c, m) || c->isfloating || c->isfullscreen)
@@ -2999,7 +3007,7 @@ toggletag(const Arg *arg)
 		focusclient(focustop(selmon), 1);
 		arrange(selmon);
 	}
-	wlr_log(WLR_DEBUG,"toggletag %u",newtags);
+	wlr_log(WLR_INFO,"toggletag %u",newtags);
 	printstatus();
 }
 
@@ -3013,7 +3021,7 @@ toggleview(const Arg *arg)
 		focusclient(focustop(selmon), 1);
 		arrange(selmon);
 	}
-        wlr_log(WLR_DEBUG,"toggleview %u",newtagset);
+        wlr_log(WLR_INFO,"toggleview %u",newtagset);
 	printstatus();
 }
 
@@ -3026,6 +3034,7 @@ unmaplayersurface(LayerSurface *layersurface)
 			seat->keyboard_state.focused_surface)
 		focusclient(selclient(), 1);
 	motionnotify(0);
+	wlr_log(WLR_INFO,"unmaplayersurface");
 }
 
 void
@@ -3057,7 +3066,7 @@ unmapnotify(struct wl_listener *listener, void *data)
 	setmon(c, NULL, 0);
 	wl_list_remove(&c->flink);
 	wlr_scene_node_destroy(c->scene);
-        wlr_log(WLR_DEBUG,"unmapnotify");
+        wlr_log(WLR_INFO,"unmapnotify");
 	printstatus();
 }
 
@@ -3097,6 +3106,7 @@ updatemons(struct wl_listener *listener, void *data)
 	}
 
 	wlr_output_manager_v1_set_configuration(output_mgr, config);
+	wlr_log(WLR_INFO,"updatemons");
 }
 
 void
@@ -3116,7 +3126,7 @@ urgent(struct wl_listener *listener, void *data)
 	Client *c = client_from_wlr_surface(event->surface);
 	if (c != selclient()) {
 		c->isurgent = 1;
-                wlr_log(WLR_DEBUG,"urgent");
+                wlr_log(WLR_INFO,"urgent");
 		printstatus();
 	}
 }
@@ -3131,7 +3141,7 @@ view(const Arg *arg)
 		selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
 	focusclient(focustop(selmon), 1);
 	arrange(selmon);
-        wlr_log(WLR_DEBUG,"view");
+        wlr_log(WLR_INFO,"view");
 	printstatus();
 }
 
@@ -3211,7 +3221,7 @@ zoom(const Arg *arg)
 	wl_list_remove(&sel->link);
 	wl_list_insert(&clients, &sel->link);
 
-	wlr_log(WLR_DEBUG,"zoom");
+	wlr_log(WLR_INFO,"zoom");
 	focusclient(sel, 1);
 	arrange(selmon);
 }
