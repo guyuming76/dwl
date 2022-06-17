@@ -3088,9 +3088,10 @@ void
 updatetitle(struct wl_listener *listener, void *data)
 {
 	Client *c = wl_container_of(listener, c, set_title);
-	if (c == focustop(c->mon))
+	if (c == focustop(c->mon)) {
 	        wlr_log(WLR_DEBUG,"updatetitle");
 		printstatus();
+	}
 }
 
 void
