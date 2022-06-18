@@ -392,6 +392,8 @@ struct dwl_text_input *dwl_text_input_create(
 static void handle_im_grab_keyboard(struct wl_listener *listener, void *data);
 static void handle_im_keyboard_grab_destroy(struct wl_listener *listener,
                                             void *data);
+static void input_popup_update(struct dwl_input_popup *popup);
+
 #endif
 static void zoom(const Arg *arg);
 
@@ -2124,6 +2126,10 @@ setlayout(const Arg *arg)
 		selmon->lt[selmon->sellt] = (Layout *)arg->v;
 	/* TODO change layout symbol? */
 	arrange(selmon);
+#ifdef IM
+	if (input_relay && input_relay->popup)
+                input_popup_update(input_relay->popup);
+#endif
 	wlr_log(WLR_INFO,"setlayout");
 	printstatus();
 }
