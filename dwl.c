@@ -581,6 +581,8 @@ applyrules(Client *c)
 			wl_list_for_each(m, &mons, link)
 				if (r->monitor == i++)
 					mon = m;
+
+			wlr_log(WLR_INFO,"applyrule");
 		}
 	}
 	wlr_scene_node_reparent(c->scene, layers[c->isfloating ? LyrFloat : LyrTile]);
@@ -594,8 +596,10 @@ arrange(Monitor *m)
 	wl_list_for_each(c, &clients, link)
 		wlr_scene_node_set_enabled(c->scene, VISIBLEON(c, c->mon));
 
-	if (m->lt[m->sellt]->arrange)
+	if (m->lt[m->sellt]->arrange){
+	        wlr_log(WLR_INFO,"arrange"); 
 		m->lt[m->sellt]->arrange(m);
+	}
 	/* TODO recheck pointer focus here... or in resize()? */
 }
 
@@ -2310,7 +2314,7 @@ static void handle_text_input_commit(struct wl_listener *listener,
 		wlr_log(WLR_INFO, "text_input_commit but input method is NULL");
 		return;
 	}
-	wlr_log(WLR_INFO, "text_input_commit");
+	wlr_log(WLR_DEBUG, "text_input_commit");
 	relay_send_im_state(text_input->relay, text_input->input);
 }
 
