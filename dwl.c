@@ -439,6 +439,8 @@ static struct wlr_box sgeom;
 static struct wl_list mons;
 static Monitor *selmon;
 
+static unsigned int printstatusSkip=0;
+
 /* global event handlers */
 static struct wl_listener cursor_axis = {.notify = axisnotify};
 static struct wl_listener cursor_button = {.notify = buttonpress};
@@ -1593,6 +1595,8 @@ mapnotify(struct wl_listener *listener, void *data)
 		wlr_scene_rect_set_color(c->border[i], bordercolor);
 	}
 
+	printstatusSkip++;
+
 	/* Initialize client geometry with room for border */
 	client_set_tiled(c, WLR_EDGE_TOP | WLR_EDGE_BOTTOM | WLR_EDGE_LEFT | WLR_EDGE_RIGHT);
 	client_get_geometry(c, &c->geom);
@@ -1606,13 +1610,15 @@ mapnotify(struct wl_listener *listener, void *data)
 	/* Set initial monitor, tags, floating status, and focus */
 	applyrules(c);
 
-        wlr_log(WLR_INFO,"mapnotify");
-	printstatus();
-
+        printstatusSkip--;
 	if (c->isfullscreen)
 		setfullscreen(c, 1);
+	else
+                printstatus();
 
 	c->mon->un_map = 1;
+
+	wlr_log(WLR_INFO,"mapnotify");
 }
 
 #ifdef IM
@@ -1867,7 +1873,11 @@ printstatus(void)
 	Client *c;
 	unsigned int occ, urg, sel;
 
-	wl_list_for_each(m, &mons, link) {
+	if (printstatusSkip){
+	    wlr_log(WLR_INFO,"printstatus skipped");
+	}
+	else {
+	    wl_list_for_each(m, &mons, link) {
 		occ = urg = 0;
 		wl_list_for_each(c, &clients, link) {
 			if (c->mon != m)
@@ -1900,8 +1910,9 @@ printstatus(void)
 		wlr_log(WLR_INFO,"%s tags %u %u %u %u", m->wlr_output->name, occ, m->tagset[m->seltags],sel, urg);
 		printf("%s layout %s\n", m->wlr_output->name, m->lt[m->sellt]->symbol);
 		wlr_log(WLR_INFO,"%s layout %s", m->wlr_output->name, m->lt[m->sellt]->symbol);
+	    }
+	    fflush(stdout);
 	}
-	fflush(stdout);
 }
 
 void
@@ -2096,9 +2107,12 @@ setfullscreen(Client *c, int fullscreen)
 		 * client positions are set by the user and cannot be recalculated */
 		resize(c, c->prev.x, c->prev.y, c->prev.width, c->prev.height, 0);
 	}
+
+	printstatusSkip++;
 	arrange(c->mon);
-	wlr_log(WLR_INFO,"setfullscreen %d",fullscreen);
+	printstatusSkip--;
 	printstatus();
+        wlr_log(WLR_INFO,"setfullscreen %d",fullscreen);
 }
 
 void
@@ -3140,13 +3154,16 @@ view(const Arg *arg)
 {
 	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
 		return;
+
+        printstatusSkip++;
 	selmon->seltags ^= 1; /* toggle sel tagset */
 	if (arg->ui & TAGMASK)
 		selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
 	focusclient(focustop(selmon), 1);
 	arrange(selmon);
-        wlr_log(WLR_INFO,"view");
+	printstatusSkip--;
 	printstatus();
+        wlr_log(WLR_INFO,"view");
 }
 
 void
