@@ -570,7 +570,9 @@ applyrules(Client *c)
 	const Rule *r;
 	Monitor *mon = selmon, *m;
 
-	c->isfloating = client_is_float_type(c);
+
+	wlr_log(WLR_INFO,"applyrules");
+        c->isfloating = client_is_float_type(c);
 	if (!(appid = client_get_appid(c)))
 		appid = broken;
 	if (!(title = client_get_title(c)))
@@ -586,7 +588,7 @@ applyrules(Client *c)
 				if (r->monitor == i++)
 					mon = m;
 
-			wlr_log(WLR_INFO,"applyrule");
+			wlr_log(WLR_INFO,"apply rule");
 		}
 	}
 	wlr_scene_node_reparent(c->scene, layers[c->isfloating ? LyrFloat : LyrTile]);
@@ -597,11 +599,11 @@ void
 arrange(Monitor *m)
 {
 	Client *c;
-	wl_list_for_each(c, &clients, link)
+        wlr_log(WLR_INFO,"arrange"); 
+        wl_list_for_each(c, &clients, link)
 		wlr_scene_node_set_enabled(c->scene, VISIBLEON(c, c->mon));
 
 	if (m->lt[m->sellt]->arrange){
-	        wlr_log(WLR_INFO,"arrange"); 
 		m->lt[m->sellt]->arrange(m);
 #ifdef IM
 	        if (input_relay && input_relay->popup)
@@ -958,7 +960,8 @@ createlayersurface(struct wl_listener *listener, void *data)
 	Monitor *m;
 	struct wlr_layer_surface_v1_state old_state;
 
-	if (!wlr_layer_surface->output) {
+	wlr_log(WLR_INFO,"createlayersurface");
+        if (!wlr_layer_surface->output) {
 		wlr_layer_surface->output = selmon->wlr_output;
 	}
 
@@ -992,8 +995,6 @@ createlayersurface(struct wl_listener *listener, void *data)
 	wlr_layer_surface->current = wlr_layer_surface->pending;
 	arrangelayers(m);
 	wlr_layer_surface->current = old_state;
-
-	wlr_log(WLR_INFO,"createlayersurface");
 }
 
 void
@@ -1003,9 +1004,10 @@ createmon(struct wl_listener *listener, void *data)
 	 * monitor) becomes available. */
 	struct wlr_output *wlr_output = data;
 	const MonitorRule *r;
-	Monitor *m = wlr_output->data = ecalloc(1, sizeof(*m));
-	m->wlr_output = wlr_output;
+        Monitor *m = wlr_output->data = ecalloc(1, sizeof(*m));
+        wlr_log(WLR_INFO,"createmon");
 
+        m->wlr_output = wlr_output;
 	wlr_output_init_render(wlr_output, alloc, drw);
 
 	/* Initialize monitor state using configured rules */
@@ -1040,8 +1042,6 @@ createmon(struct wl_listener *listener, void *data)
 		return;
 
 	wl_list_insert(&mons, &m->link);
-        wlr_log(WLR_INFO,"createmon");
-	printstatus();
 
 	/* Adds this to the output layout in the order it was configured in.
 	 *
@@ -1061,6 +1061,8 @@ createmon(struct wl_listener *listener, void *data)
 		wl_list_for_each(c, &clients, link)
 			setmon(c, m, c->tags);
 	}
+
+        printstatus();
 }
 
 void
@@ -1137,7 +1139,7 @@ createpointer(struct wlr_input_device *device)
 		if (libinput_device_config_scroll_get_methods(libinput_device) != LIBINPUT_CONFIG_SCROLL_NO_SCROLL)
 			libinput_device_config_scroll_set_method (libinput_device, scroll_method);
 		
-		 if (libinput_device_config_click_get_methods(libinput_device) != LIBINPUT_CONFIG_CLICK_METHOD_NONE)
+		if (libinput_device_config_click_get_methods(libinput_device) != LIBINPUT_CONFIG_CLICK_METHOD_NONE)
                         libinput_device_config_click_set_method (libinput_device, click_method);
 
 		if (libinput_device_config_send_events_get_modes(libinput_device))
@@ -1288,7 +1290,6 @@ focusclient(Client *c, int lift)
 		}
 	}
 
-	printstatus();
 	wlr_idle_set_enabled(idle, seat, wl_list_empty(&idle_inhibit_mgr->inhibitors));
 
 	if (!c) {
@@ -1321,6 +1322,8 @@ focusclient(Client *c, int lift)
 #endif
 	/* Activate the new client */
 	client_activate_surface(client_surface(c), 1);
+
+        printstatus();
 }
 
 void
@@ -1574,9 +1577,11 @@ maplayersurfacenotify(struct wl_listener *listener, void *data)
 void
 mapnotify(struct wl_listener *listener, void *data)
 {
-	/* Called when the surface is mapped, or ready to display on-screen. */
+        /* Called when the surface is mapped, or ready to display on-screen. */
 	Client *c = wl_container_of(listener, c, map);
 	int i;
+
+      	wlr_log(WLR_INFO,"mapnotify");
 
 	/* Create scene tree for this client and its border */
 	c->scene = &wlr_scene_tree_create(layers[LyrTile])->node;
@@ -1624,8 +1629,6 @@ mapnotify(struct wl_listener *listener, void *data)
                 printstatus();
 
 	c->mon->un_map = 1;
-
-	wlr_log(WLR_INFO,"mapnotify");
 }
 
 #ifdef IM
@@ -1637,9 +1640,9 @@ static void handle_im_grab_keyboard(struct wl_listener *listener, void *data) {
 	// send modifier state to grab
 	struct wlr_keyboard *active_keyboard = wlr_seat_get_keyboard(seat);
         if (active_keyboard){
+	       wlr_log(WLR_INFO,"im_grab_keyboard");
 	       wlr_input_method_keyboard_grab_v2_set_keyboard(keyboard_grab,active_keyboard);
                wlr_input_method_keyboard_grab_v2_send_modifiers(keyboard_grab, &active_keyboard->modifiers);
-	       wlr_log(WLR_INFO,"im_grab_keyboard");
 	}
         else
 	       wlr_log(WLR_INFO,"im_grab_keyboard but no active keyboard");
@@ -1655,9 +1658,8 @@ static void handle_im_keyboard_grab_destroy(struct wl_listener *listener, void *
 	struct dwl_input_method_relay *relay = wl_container_of(listener, relay,
 		input_method_keyboard_grab_destroy);
 	struct wlr_input_method_keyboard_grab_v2 *keyboard_grab = data;
-	wl_list_remove(&relay->input_method_keyboard_grab_destroy.link);
 	wlr_log(WLR_DEBUG,"im_keyboard_grab_destroy");
-	
+        wl_list_remove(&relay->input_method_keyboard_grab_destroy.link);
 	if (keyboard_grab->keyboard) {
 		// send modifier state to original client
 		wlr_seat_keyboard_notify_modifiers(keyboard_grab->input_method->seat,
@@ -1671,12 +1673,12 @@ monocle(Monitor *m)
 {
 	Client *c;
 
+	wlr_log(WLR_INFO,"monocle");
 	wl_list_for_each(c, &clients, link) {
 		if (!VISIBLEON(c, m) || c->isfloating || c->isfullscreen)
 			continue;
 		resize(c, m->w.x, m->w.y, m->w.width, m->w.height, 0);
 	}
-	wlr_log(WLR_INFO,"monocle");
 	focusclient(focustop(m), 1);
 }
 
@@ -2092,19 +2094,22 @@ setcursor(struct wl_listener *listener, void *data)
 void
 setfloating(Client *c, int floating)
 {
-	c->isfloating = floating;
-	wlr_scene_node_reparent(c->scene, layers[c->isfloating ? LyrFloat : LyrTile]);
-	arrange(c->mon);
 	wlr_log(WLR_INFO,"setfloating %d",floating);
+	
+        c->isfloating = floating;
+        wlr_scene_node_reparent(c->scene, layers[c->isfloating ? LyrFloat : LyrTile]);
+	arrange(c->mon);
 	printstatus();
 }
 
 void
 setfullscreen(Client *c, int fullscreen)
 {
-	c->isfullscreen = fullscreen;
+        wlr_log(WLR_INFO,"setfullscreen %d",fullscreen);
+	
+        c->isfullscreen = fullscreen;
 	c->bw = fullscreen ? 0 : borderpx;
-	client_set_fullscreen(c, fullscreen);
+        client_set_fullscreen(c, fullscreen);
 
 	if (fullscreen) {
 		c->prev = c->geom;
@@ -2119,19 +2124,20 @@ setfullscreen(Client *c, int fullscreen)
 	arrange(c->mon);
 	printstatusSkip--;
 	printstatus();
-        wlr_log(WLR_INFO,"setfullscreen %d",fullscreen);
 }
 
 void
 setlayout(const Arg *arg)
 {
-	if (!arg || !arg->v || arg->v != selmon->lt[selmon->sellt])
+	wlr_log(WLR_INFO,"setlayout");
+	
+        if (!arg || !arg->v || arg->v != selmon->lt[selmon->sellt])
 		selmon->sellt ^= 1;
 	if (arg && arg->v)
 		selmon->lt[selmon->sellt] = (Layout *)arg->v;
 	/* TODO change layout symbol? */
+
 	arrange(selmon);
-	wlr_log(WLR_INFO,"setlayout");
 	printstatus();
 }
 
@@ -2273,7 +2279,8 @@ static void handle_im_destroy(struct wl_listener *listener, void *data) {
 	struct dwl_input_method_relay *relay = wl_container_of(listener, relay,
 		input_method_destroy);
 	struct wlr_input_method_v2 *context = data;
-	assert(context == relay->input_method);
+	wlr_log(WLR_INFO,"IM destroy");
+        assert(context == relay->input_method);
 	relay->input_method = NULL;
 
 	text_input = relay_get_focused_text_input(relay);
@@ -2284,7 +2291,6 @@ static void handle_im_destroy(struct wl_listener *listener, void *data) {
 			text_input->input->focused_surface);
 		wlr_text_input_v3_send_leave(text_input->input);
 	}
-	wlr_log(WLR_INFO,"IM destroy");
 }
 
 static void relay_send_im_state(struct dwl_input_method_relay *relay,
@@ -2396,8 +2402,10 @@ struct dwl_text_input *dwl_text_input_create(
 	struct dwl_text_input *input;
 	input = calloc(1, sizeof(*input));
 	if (!input) {
+        	wlr_log(WLR_ERROR, "dwl_text_input_create calloc failed");
 		return NULL;
 	}
+	wlr_log(WLR_INFO, "dwl_text_input_create");
 	input->input = text_input;
 	input->relay = relay;
 
@@ -2419,7 +2427,6 @@ struct dwl_text_input *dwl_text_input_create(
 		handle_pending_focused_surface_destroy;
 	wl_list_init(&input->pending_focused_surface_destroy.link);
 
-	wlr_log(WLR_INFO, "dwl_text_input_create");
 	return input;
 }
 
@@ -2548,7 +2555,6 @@ static void input_popup_update(struct dwl_input_popup *popup) {
 			popup->popup_surface, &box);
 		wlr_log(WLR_INFO,"input_popup_update send_text_input_rect box.x %d box.y %d",box.x,box.y);
 	}
-	
         wlr_log(WLR_INFO,"input_popup_update x %d y %d visible %s",popup->x,popup->y,popup->visible?"true":"false");
 	wlr_scene_node_set_position(popup->scene, popup->x, popup->y);
 }
@@ -2557,7 +2563,9 @@ static void handle_im_popup_map(struct wl_listener *listener, void *data) {
 	struct dwl_input_popup *popup =
 		wl_container_of(listener, popup, popup_map);
 
-	popup->scene = &wlr_scene_tree_create(layers[LyrIMPopup])->node;
+	wlr_log(WLR_INFO, "IM_popup_map");
+	
+        popup->scene = &wlr_scene_tree_create(layers[LyrIMPopup])->node;
 	popup->scene_surface = wlr_scene_subsurface_tree_create(popup->scene,
 			popup->popup_surface->surface);
 	popup->scene_surface->data = popup;
@@ -2565,8 +2573,6 @@ static void handle_im_popup_map(struct wl_listener *listener, void *data) {
 	input_popup_update(popup);
 
 	//wlr_scene_node_set_position(popup->scene, popup->x, popup->y);
-
-	wlr_log(WLR_INFO, "IM_popup_map");
 }
 
 static void handle_im_popup_unmap(struct wl_listener *listener, void *data) {
@@ -2574,23 +2580,24 @@ static void handle_im_popup_unmap(struct wl_listener *listener, void *data) {
 		wl_container_of(listener, popup, popup_unmap);
 	//input_popup_update(popup);
 
-	wlr_scene_node_destroy(popup->scene);
 	wlr_log(WLR_INFO,"im_popup_unmap");
+	wlr_scene_node_destroy(popup->scene);
 }
 
 static void handle_im_popup_destroy(struct wl_listener *listener, void *data) {
         struct dwl_input_method_relay *relay;
         struct dwl_input_popup *popup =
 		wl_container_of(listener, popup, popup_destroy);
-	wl_list_remove(&popup->popup_destroy.link);
+
+	wlr_log(WLR_INFO,"im_popup_destroy");
+	
+        wl_list_remove(&popup->popup_destroy.link);
 	wl_list_remove(&popup->popup_unmap.link);
 	wl_list_remove(&popup->popup_map.link);
 
 	relay=popup->relay;
 	free(popup->relay->popup);
 	relay->popup=NULL;
-
-	wlr_log(WLR_INFO,"im_popup_destroy");
 }
 
 
@@ -2600,6 +2607,8 @@ static void handle_im_new_popup_surface(struct wl_listener *listener, void *data
 	struct dwl_input_method_relay *relay = wl_container_of(listener, relay,
 		input_method_new_popup_surface);
 	struct dwl_input_popup *popup = calloc(1, sizeof(*popup));
+
+	wlr_log(WLR_INFO, "IM_new_popup_surface");
 	relay->popup = popup;
 	
 	popup->relay = relay;
@@ -2617,9 +2626,6 @@ static void handle_im_new_popup_surface(struct wl_listener *listener, void *data
 	wl_signal_add(
 		&popup->popup_surface->events.destroy, &popup->popup_destroy);
 	popup->popup_destroy.notify = handle_im_popup_destroy;
-
-	wlr_log(WLR_INFO, "IM_new_popup_surface");
-
 }
 
 
@@ -2632,16 +2638,19 @@ static void relay_handle_input_method(struct wl_listener *listener,
 
 	struct wlr_input_method_v2 *input_method = data;
 	if (seat != input_method->seat) {
-		return;
+	        wlr_log(WLR_INFO,"input_method_new Seat does not match");
+	        return;
 	}
 
 	if (relay->input_method != NULL) {
-		wlr_log(WLR_INFO, "Attempted to connect second input method to a seat");
+		wlr_log(WLR_INFO, "input_method_new Attempted to connect second input method to a seat");
 		wlr_input_method_v2_send_unavailable(input_method);
 		return;
 	}
 
-	relay->input_method = input_method;
+        wlr_log(WLR_INFO,"input_method_new");
+	
+        relay->input_method = input_method;
 	wl_signal_add(&relay->input_method->events.commit,
 		&relay->input_method_commit);
 	relay->input_method_commit.notify = handle_im_commit;
@@ -2655,7 +2664,6 @@ static void relay_handle_input_method(struct wl_listener *listener,
 		&relay->input_method_destroy);
 	relay->input_method_destroy.notify = handle_im_destroy;
 
-        wlr_log(WLR_INFO,"input_method_new");
         wlr_input_method_v2_send_activate(relay->input_method);
 
 	text_input = relay_get_focusable_text_input(relay);
@@ -2946,13 +2954,13 @@ tag(const Arg *arg)
 {
 	Client *sel = selclient();
 	if (sel && arg->ui & TAGMASK) {
-		sel->tags = arg->ui & TAGMASK;
+	        sel->tags = arg->ui & TAGMASK;
+        	wlr_log(WLR_INFO,"tag sel->tags %u",sel->tags);
 		focusclient(focustop(selmon), 1);
-		wlr_log(WLR_INFO,"tag sel->tags %u",sel->tags);
 		arrange(selmon);
 	}
 	else {
-	  wlr_log(WLR_INFO,"tag");
+	        wlr_log(WLR_INFO,"tag");
         }
 	printstatus();
 }
@@ -2972,7 +2980,8 @@ tile(Monitor *m)
 	unsigned int i, n = 0, h, mw, my, ty;
 	Client *c;
 
-	wl_list_for_each(c, &clients, link)
+        wlr_log(WLR_INFO,"tile");
+        wl_list_for_each(c, &clients, link)
 		if (VISIBLEON(c, m) && !c->isfloating && !c->isfullscreen)
 			n++;
 	if (n == 0)
@@ -2983,8 +2992,6 @@ tile(Monitor *m)
 	else
 		mw = m->w.width;
 	i = my = ty = 0;
-
-        wlr_log(WLR_INFO,"tile");
 	
 	wl_list_for_each(c, &clients, link) {
 		if (!VISIBLEON(c, m) || c->isfloating || c->isfullscreen)
@@ -3007,6 +3014,7 @@ togglefloating(const Arg *arg)
 {
 	Client *sel = selclient();
 	/* return if fullscreen */
+        wlr_log(WLR_INFO,"togglefloating");
 	if (sel && !sel->isfullscreen)
 		setfloating(sel, !sel->isfloating);
 }
@@ -3015,6 +3023,7 @@ void
 togglefullscreen(const Arg *arg)
 {
 	Client *sel = selclient();
+	wlr_log(WLR_INFO,"togglefullscreen");
 	if (sel)
 		setfullscreen(sel, !sel->isfullscreen);
 }
@@ -3024,15 +3033,19 @@ toggletag(const Arg *arg)
 {
 	unsigned int newtags;
 	Client *sel = selclient();
-	if (!sel)
+
+        if (!sel){
+	         wlr_log(WLR_INFO,"toggletag with no select");
 		return;
+	}
 	newtags = sel->tags ^ (arg->ui & TAGMASK);
+        wlr_log(WLR_INFO,"toggletag %u",newtags);
 	if (newtags) {
 		sel->tags = newtags;
 		focusclient(focustop(selmon), 1);
 		arrange(selmon);
 	}
-	wlr_log(WLR_INFO,"toggletag %u",newtags);
+
 	printstatus();
 }
 
@@ -3040,26 +3053,25 @@ void
 toggleview(const Arg *arg)
 {
 	unsigned int newtagset = selmon->tagset[selmon->seltags] ^ (arg->ui & TAGMASK);
-
+        wlr_log(WLR_INFO,"toggleview %u",newtagset);
 	if (newtagset) {
 		selmon->tagset[selmon->seltags] = newtagset;
 		focusclient(focustop(selmon), 1);
 		arrange(selmon);
 	}
-        wlr_log(WLR_INFO,"toggleview %u",newtagset);
 	printstatus();
 }
 
 void
 unmaplayersurface(LayerSurface *layersurface)
 {
-	layersurface->layer_surface->mapped = (layersurface->mapped = 0);
+	wlr_log(WLR_INFO,"unmaplayersurface");
+        layersurface->layer_surface->mapped = (layersurface->mapped = 0);
 	wlr_scene_node_set_enabled(layersurface->scene, 0);
 	if (layersurface->layer_surface->surface ==
 			seat->keyboard_state.focused_surface)
 		focusclient(selclient(), 1);
 	motionnotify(0);
-	wlr_log(WLR_INFO,"unmaplayersurface");
 }
 
 void
@@ -3074,7 +3086,8 @@ unmapnotify(struct wl_listener *listener, void *data)
 {
 	/* Called when the surface is unmapped, and should no longer be shown. */
 	Client *c = wl_container_of(listener, c, unmap);
-	if (c == grabc) {
+        wlr_log(WLR_INFO,"unmapnotify");
+        if (c == grabc) {
 		cursor_mode = CurNormal;
 		grabc = NULL;
 	}
@@ -3091,7 +3104,6 @@ unmapnotify(struct wl_listener *listener, void *data)
 	setmon(c, NULL, 0);
 	wl_list_remove(&c->flink);
 	wlr_scene_node_destroy(c->scene);
-        wlr_log(WLR_INFO,"unmapnotify");
 	printstatus();
 }
 
@@ -3108,7 +3120,8 @@ updatemons(struct wl_listener *listener, void *data)
 	struct wlr_output_configuration_v1 *config =
 		wlr_output_configuration_v1_create();
 	Monitor *m;
-	sgeom = *wlr_output_layout_get_box(output_layout, NULL);
+	wlr_log(WLR_INFO,"updatemons");
+        sgeom = *wlr_output_layout_get_box(output_layout, NULL);
 	wl_list_for_each(m, &mons, link) {
 		struct wlr_output_configuration_head_v1 *config_head =
 			wlr_output_configuration_head_v1_create(config, m->wlr_output);
@@ -3129,17 +3142,15 @@ updatemons(struct wl_listener *listener, void *data)
 		config_head->state.x = m->m.x;
 		config_head->state.y = m->m.y;
 	}
-
 	wlr_output_manager_v1_set_configuration(output_mgr, config);
-	wlr_log(WLR_INFO,"updatemons");
 }
 
 void
 updatetitle(struct wl_listener *listener, void *data)
 {
 	Client *c = wl_container_of(listener, c, set_title);
-	if (c == focustop(c->mon)) {
-	        wlr_log(WLR_DEBUG,"updatetitle");
+        wlr_log(WLR_DEBUG,"updatetitle");
+        if (c == focustop(c->mon)) {
 		printstatus();
 	}
 }
@@ -3149,9 +3160,9 @@ urgent(struct wl_listener *listener, void *data)
 {
 	struct wlr_xdg_activation_v1_request_activate_event *event = data;
 	Client *c = client_from_wlr_surface(event->surface);
+        wlr_log(WLR_INFO,"urgent");
 	if (c != selclient()) {
 		c->isurgent = 1;
-                wlr_log(WLR_INFO,"urgent");
 		printstatus();
 	}
 }
@@ -3159,7 +3170,8 @@ urgent(struct wl_listener *listener, void *data)
 void
 view(const Arg *arg)
 {
-	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
+        wlr_log(WLR_INFO,"view");
+        if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
 		return;
 
         printstatusSkip++;
@@ -3170,7 +3182,6 @@ view(const Arg *arg)
 	arrange(selmon);
 	printstatusSkip--;
 	printstatus();
-        wlr_log(WLR_INFO,"view");
 }
 
 void
@@ -3226,6 +3237,7 @@ zoom(const Arg *arg)
 {
 	Client *c, *sel = selclient();
 
+	wlr_log(WLR_INFO,"zoom");
 	if (!sel || !selmon->lt[selmon->sellt]->arrange || sel->isfloating)
 		return;
 
@@ -3249,7 +3261,6 @@ zoom(const Arg *arg)
 	wl_list_remove(&sel->link);
 	wl_list_insert(&clients, &sel->link);
 
-	wlr_log(WLR_INFO,"zoom");
 	focusclient(sel, 1);
 	arrange(selmon);
 }
