@@ -603,6 +603,11 @@ arrange(Monitor *m)
 	if (m->lt[m->sellt]->arrange){
 	        wlr_log(WLR_INFO,"arrange"); 
 		m->lt[m->sellt]->arrange(m);
+#ifdef IM
+	        if (input_relay && input_relay->popup)
+		        input_popup_update(input_relay->popup);
+#endif
+
 	}
 	/* TODO recheck pointer focus here... or in resize()? */
 }
@@ -2126,10 +2131,6 @@ setlayout(const Arg *arg)
 		selmon->lt[selmon->sellt] = (Layout *)arg->v;
 	/* TODO change layout symbol? */
 	arrange(selmon);
-#ifdef IM
-	if (input_relay && input_relay->popup)
-                input_popup_update(input_relay->popup);
-#endif
 	wlr_log(WLR_INFO,"setlayout");
 	printstatus();
 }
