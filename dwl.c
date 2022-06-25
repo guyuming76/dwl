@@ -108,8 +108,10 @@ typedef struct {
 
 typedef struct Monitor Monitor;
 typedef struct {
-	/* Must be first */
+	/* Must keep these three elements in this order */
 	unsigned int type; /* XDGShell or X11* */
+	struct wlr_box geom;  /* layout-relative, includes border */
+	Monitor *mon;
 	struct wlr_scene_node *scene;
 	struct wlr_scene_rect *border[4]; /* top, bottom, left, right */
 	struct wlr_scene_node *scene_surface;
@@ -125,8 +127,7 @@ typedef struct {
 	struct wl_listener destroy;
 	struct wl_listener set_title;
 	struct wl_listener fullscreen;
-	struct wlr_box geom, prev;  /* layout-relative, includes border */
-	Monitor *mon;
+	struct wlr_box prev;  /* layout-relative, includes border */
 #ifdef XWAYLAND
 	struct wl_listener activate;
 	struct wl_listener configure;
@@ -163,19 +164,19 @@ typedef struct {
 } Keyboard;
 
 typedef struct {
-	/* Must be first */
+	/* Must keep these three elements in this order */
 	unsigned int type; /* LayerShell */
-	int mapped;
+	struct wlr_box geom;
+	Monitor *mon;
 	struct wlr_scene_node *scene;
 	struct wl_list link;
+	int mapped;
 	struct wlr_layer_surface_v1 *layer_surface;
 
 	struct wl_listener destroy;
 	struct wl_listener map;
 	struct wl_listener unmap;
 	struct wl_listener surface_commit;
-
-	struct wlr_box geo;
 } LayerSurface;
 
 typedef struct {
@@ -681,7 +682,7 @@ arrangelayer(Monitor *m, struct wl_list *list, struct wlr_box *usable_area, int 
 			wlr_layer_surface_v1_destroy(wlr_layer_surface);
 			continue;
 		}
-		layersurface->geo = box;
+		layersurface->geom = box;
 
 		if (state->exclusive_zone > 0)
 			applyexclusive(usable_area, state->anchor, state->exclusive_zone,
@@ -880,13 +881,12 @@ commitlayersurfacenotify(struct wl_listener *listener, void *data)
 	LayerSurface *layersurface = wl_container_of(listener, layersurface, surface_commit);
 	struct wlr_layer_surface_v1 *wlr_layer_surface = layersurface->layer_surface;
 	struct wlr_output *wlr_output = wlr_layer_surface->output;
-	Monitor *m;
+
+	if (!wlr_output || !(layersurface->mon = wlr_output->data))
+		return;
 
 	wlr_scene_node_reparent(layersurface->scene,
 			layers[wlr_layer_surface->current.layer]);
-
-	if (!wlr_output || !(m = wlr_output->data))
-		return;
 
 	if (wlr_layer_surface->current.committed == 0
 			&& layersurface->mapped == wlr_layer_surface->mapped)
@@ -896,10 +896,10 @@ commitlayersurfacenotify(struct wl_listener *listener, void *data)
 
 	if (layers[wlr_layer_surface->current.layer] != layersurface->scene) {
 		wl_list_remove(&layersurface->link);
-		wl_list_insert(&m->layers[wlr_layer_surface->current.layer],
+		wl_list_insert(&layersurface->mon->layers[wlr_layer_surface->current.layer],
 			&layersurface->link);
 	}
-	arrangelayers(m);
+	arrangelayers(layersurface->mon);
 }
 
 void
@@ -957,7 +957,6 @@ createlayersurface(struct wl_listener *listener, void *data)
 {
 	struct wlr_layer_surface_v1 *wlr_layer_surface = data;
 	LayerSurface *layersurface;
-	Monitor *m;
 	struct wlr_layer_surface_v1_state old_state;
 
 	wlr_log(WLR_INFO,"createlayersurface");
@@ -978,14 +977,14 @@ createlayersurface(struct wl_listener *listener, void *data)
 
 	layersurface->layer_surface = wlr_layer_surface;
 	wlr_layer_surface->data = layersurface;
-	m = wlr_layer_surface->output->data;
+	layersurface->mon = wlr_layer_surface->output->data;
 
 	layersurface->scene = wlr_layer_surface->surface->data =
 			wlr_scene_subsurface_tree_create(layers[wlr_layer_surface->pending.layer],
 			wlr_layer_surface->surface);
 	layersurface->scene->data = layersurface;
 
-	wl_list_insert(&m->layers[wlr_layer_surface->pending.layer],
+	wl_list_insert(&layersurface->mon->layers[wlr_layer_surface->pending.layer],
 			&layersurface->link);
 
 	/* Temporarily set the layer's current state to pending
@@ -993,7 +992,7 @@ createlayersurface(struct wl_listener *listener, void *data)
 	 */
 	old_state = wlr_layer_surface->current;
 	wlr_layer_surface->current = wlr_layer_surface->pending;
-	arrangelayers(m);
+	arrangelayers(layersurface->mon);
 	wlr_layer_surface->current = old_state;
 }
 
@@ -1082,9 +1081,9 @@ createnotify(struct wl_listener *listener, void *data)
 		wlr_log(WLR_INFO,"createnotify WLR_XDG_SURFACE_ROLE_POPUP");
 		xdg_surface->surface->data = wlr_scene_xdg_surface_create(
 				xdg_surface->popup->parent->data, xdg_surface);
-		if (!(c = client_from_popup(xdg_surface->popup)) || !c->mon)
+		if (!(c = toplevel_from_popup(xdg_surface->popup)) || !c->mon)
 			return;
-		box = c->mon->m;
+		box = c->mon->w;
 		box.x -= c->geom.x;
 		box.y -= c->geom.y;
 		wlr_xdg_popup_unconstrain_from_box(xdg_surface->popup, &box);
@@ -1108,7 +1107,6 @@ createnotify(struct wl_listener *listener, void *data)
 	LISTEN(&xdg_surface->toplevel->events.set_title, &c->set_title, updatetitle);
 	LISTEN(&xdg_surface->toplevel->events.request_fullscreen, &c->fullscreen,
 			fullscreennotify);
-	c->isfullscreen = 0;
 }
 
 void
@@ -1187,9 +1185,8 @@ destroylayersurfacenotify(struct wl_listener *listener, void *data)
 	wl_list_remove(&layersurface->surface_commit.link);
 	wlr_scene_node_destroy(layersurface->scene);
 	if (layersurface->layer_surface->output) {
-		Monitor *m = layersurface->layer_surface->output->data;
-		if (m)
-			arrangelayers(m);
+		if ((layersurface->mon = layersurface->layer_surface->output->data))
+			arrangelayers(layersurface->mon);
 		layersurface->layer_surface->output = NULL;
 	}
 	free(layersurface);
@@ -1259,6 +1256,7 @@ focusclient(Client *c, int lift)
 		wl_list_insert(&fstack, &c->flink);
 		selmon = c->mon;
 		c->isurgent = 0;
+		client_restack_surface(c);
 
 		for (i = 0; i < 4; i++)
 			wlr_scene_rect_set_color(c->border[i], focuscolor);
@@ -1282,7 +1280,7 @@ focusclient(Client *c, int lift)
 				return;
 		} else {
 			Client *w;
-			if (old->role_data && (w = client_from_wlr_surface(old)))
+			if ((w = client_from_wlr_surface(old)))
 				for (i = 0; i < 4; i++)
 					wlr_scene_rect_set_color(w->border[i], bordercolor);
 
@@ -1300,15 +1298,6 @@ focusclient(Client *c, int lift)
 #endif
 		return;
 	}
-
-#ifdef XWAYLAND
-	/* This resolves an issue where the last spawned xwayland client
-	 * receives all pointer activity.
-	 */
-	if (c->type == X11Managed)
-		wlr_xwayland_surface_restack(c->surface.xwayland, NULL,
-				XCB_STACK_MODE_ABOVE);
-#endif
 
 	/* Have a client, so focus its top-level wlr_surface */
 	kb = wlr_seat_get_keyboard(seat);
@@ -1569,8 +1558,9 @@ void
 maplayersurfacenotify(struct wl_listener *listener, void *data)
 {
 	LayerSurface *layersurface = wl_container_of(listener, layersurface, map);
+	layersurface->mon = layersurface->layer_surface->output->data;
 	wlr_surface_send_enter(layersurface->layer_surface->surface,
-		layersurface->layer_surface->output);
+		layersurface->mon->wlr_output);
 	motionnotify(0);
 }
 
@@ -3299,7 +3289,6 @@ createnotifyx11(struct wl_listener *listener, void *data)
 	c->surface.xwayland = xwayland_surface;
 	c->type = xwayland_surface->override_redirect ? X11Unmanaged : X11Managed;
 	c->bw = borderpx;
-	c->isfullscreen = 0;
 
 	/* Listen to the various events it can emit */
 	LISTEN(&xwayland_surface->events.map, &c->map, mapnotify);

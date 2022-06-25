@@ -65,8 +65,6 @@ https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3433
 
 https://github.com/djpohly/dwl/pull/235
 
-
-
 https://gitee.com/guyuming76/dwl/tree/guyuming4/   (summary for phase PR12)
 
 https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3427

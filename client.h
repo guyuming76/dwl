@@ -231,6 +231,17 @@ client_min_size(Client *c, int *width, int *height)
 	*height = state->min_height;
 }
 
+static inline void
+client_restack_surface(Client *c)
+{
+#ifdef XWAYLAND
+	if (client_is_x11(c))
+		wlr_xwayland_surface_restack(c->surface.xwayland, NULL,
+				XCB_STACK_MODE_ABOVE);
+#endif
+	return;
+}
+
 static inline Client *
 client_from_wlr_surface(struct wlr_surface *s)
 {
@@ -255,16 +266,22 @@ client_from_wlr_surface(struct wlr_surface *s)
 }
 
 
-
-static inline Client *
-client_from_popup(struct wlr_xdg_popup *popup)
+//static inline Client *
+//client_from_popup(struct wlr_xdg_popup *popup)
+//git show  9b84940e37ec84933d1247bbf3eb76d9efe7c589
+//这个commit 把返回值从 Client* 改成 Void* 为啥？代码可读性不是更差了吗？
+//toplevel 不一定是Client 吗？
+static inline void *
+toplevel_from_popup(struct wlr_xdg_popup *popup)
 {
 	struct wlr_xdg_surface *surface = popup->base;
 
 	while (1) {
 		switch (surface->role) {
 		case WLR_XDG_SURFACE_ROLE_POPUP:
-			if (!wlr_surface_is_xdg_surface(surface->popup->parent))
+			if (wlr_surface_is_layer_surface(surface->popup->parent))
+				return wlr_layer_surface_v1_from_wlr_surface(surface->popup->parent)->data;
+			else if (!wlr_surface_is_xdg_surface(surface->popup->parent))
 				return NULL;
 
 			surface = wlr_xdg_surface_from_wlr_surface(surface->popup->parent);
