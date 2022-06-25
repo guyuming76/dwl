@@ -2451,7 +2451,7 @@ static void get_parent_and_output_box(struct wlr_surface *focused_surface,
 			layer_surface_from_wlr_layer_surface_v1(layer_surface);
 		output = layer->layer_surface->output;
 		output_box_tmp = wlr_output_layout_get_box(output_layout, output);
-		*parent = layer->geo;
+		*parent = layer->geom;
 		parent->x += output_box_tmp->x;
 		parent->y += output_box_tmp->y;
 	} else {
