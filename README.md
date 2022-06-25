@@ -89,11 +89,15 @@ https://github.com/djpohly/dwl/pull/12
 合并上游更新操作步骤：
 
 1.从 https://github.com/guyuming76/dwl  可以看出上游 https://github.com/djpohly/dwl 有没有新的commit, 如有，可以通过 FetchUpstream 同步;
-2.本地remote设置如下(remote 名称可以随意取，比如我在另一台机器上github对应的叫origin)：    gym@gymDeskGentoo ~/dwl $ git remote -v
+
+2.本地remote设置如下(remote 名称可以随意取，比如我在另一台机器上github对应的叫origin)：
+gym@gymDeskGentoo ~/dwl $ git remote -v
 github	https://github.com/guyuming76/dwl.git (fetch)
 github	https://github.com/guyuming76/dwl.git (push)
 origin	https://gitee.com/guyuming76/dwl.git (fetch)
 origin	https://gitee.com/guyuming76/dwl.git (push)
+
 3. 第1步FetchUpstream后，本地 git pull github main 获取， 再通过 git push origin main 推送到 gitee，
    也可先通过 git log origin/main..github/main 查看 gitee 和 github有啥不同
+
 4. 再切换到一个分支，比如 git checkout PR235_10, 然后 git merge main 来合并上游的更新，可能会要手工解决一些冲突.
