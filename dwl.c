@@ -369,7 +369,6 @@ static void togglefloating(const Arg *arg);
 static void togglefullscreen(const Arg *arg);
 static void toggletag(const Arg *arg);
 static void toggleview(const Arg *arg);
-static void unmaplayersurface(LayerSurface *layersurface);
 static void unmaplayersurfacenotify(struct wl_listener *listener, void *data);
 static void unmapnotify(struct wl_listener *listener, void *data);
 static void updatemons(struct wl_listener *listener, void *data);
@@ -493,9 +492,15 @@ struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
 void
 applybounds(Client *c, struct wlr_box *bbox)
 {
-	/* set minimum possible */
-	c->geom.width = MAX(1, c->geom.width);
-	c->geom.height = MAX(1, c->geom.height);
+	struct wlr_box min = {0}, max = {0};
+	client_get_size_hints(c, &max, &min);
+	/* try to set size hints */
+	c->geom.width = MAX(min.width + (2 * c->bw), c->geom.width);
+	c->geom.height = MAX(min.height + (2 * c->bw), c->geom.height);
+	if (max.width > 0)
+		c->geom.width = MIN(max.width + (2 * c->bw), c->geom.width);
+	if (max.height > 0)
+		c->geom.height = MIN(max.height + (2 * c->bw), c->geom.height);
 
 	if (c->geom.x >= bbox->x + bbox->width)
 		c->geom.x = bbox->x + bbox->width - c->geom.width;
@@ -1077,13 +1082,18 @@ createnotify(struct wl_listener *listener, void *data)
 
 	if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_POPUP) {
 		struct wlr_box box;
-
-		wlr_log(WLR_INFO,"createnotify WLR_XDG_SURFACE_ROLE_POPUP");
+		LayerSurface *l;
+		void *toplevel = toplevel_from_popup(xdg_surface->popup);
+        	wlr_log(WLR_INFO,"createnotify WLR_XDG_SURFACE_ROLE_POPUP");
+		
 		xdg_surface->surface->data = wlr_scene_xdg_surface_create(
 				xdg_surface->popup->parent->data, xdg_surface);
-		if (!(c = toplevel_from_popup(xdg_surface->popup)) || !c->mon)
+		if (wlr_surface_is_layer_surface(xdg_surface->popup->parent) && (l = toplevel)
+				&& l->layer_surface->current.layer < ZWLR_LAYER_SHELL_V1_LAYER_TOP)
+			wlr_scene_node_reparent(xdg_surface->surface->data, layers[LyrTop]);
+		if (!(c = toplevel) || !c->mon)
 			return;
-		box = c->mon->w;
+		box = c->type == LayerShell ? c->mon->m : c->mon->w;
 		box.x -= c->geom.x;
 		box.y -= c->geom.y;
 		wlr_xdg_popup_unconstrain_from_box(xdg_surface->popup, &box);
@@ -1176,8 +1186,6 @@ destroylayersurfacenotify(struct wl_listener *listener, void *data)
 {
 	LayerSurface *layersurface = wl_container_of(listener, layersurface, destroy);
 
-	if (layersurface->layer_surface->mapped)
-		unmaplayersurface(layersurface);
 	wl_list_remove(&layersurface->link);
 	wl_list_remove(&layersurface->destroy.link);
 	wl_list_remove(&layersurface->map.link);
@@ -1974,13 +1982,11 @@ requeststartdrag(struct wl_listener *listener, void *data)
 void
 resize(Client *c, int x, int y, int w, int h, int interact)
 {
-	int min_width = 0, min_height = 0;
 	struct wlr_box *bbox = interact ? &sgeom : &c->mon->w;
-	client_min_size(c, &min_width, &min_height);
 	c->geom.x = x;
 	c->geom.y = y;
-	c->geom.width = MAX(min_width + 2 * c->bw, w);
-	c->geom.height = MAX(min_height + 2 * c->bw, h);
+	c->geom.width = w;
+	c->geom.height = h;
 	applybounds(c, bbox);
 
 	/* Update scene-graph, including borders */
@@ -3053,22 +3059,17 @@ toggleview(const Arg *arg)
 }
 
 void
-unmaplayersurface(LayerSurface *layersurface)
+unmaplayersurfacenotify(struct wl_listener *listener, void *data)
 {
-	wlr_log(WLR_INFO,"unmaplayersurface");
-        layersurface->layer_surface->mapped = (layersurface->mapped = 0);
+	LayerSurface *layersurface = wl_container_of(listener, layersurface, unmap);
+        wlr_log(WLR_INFO,"unmaplayersurface");
+	layersurface->layer_surface->mapped = (layersurface->mapped = 0);
+
 	wlr_scene_node_set_enabled(layersurface->scene, 0);
 	if (layersurface->layer_surface->surface ==
 			seat->keyboard_state.focused_surface)
 		focusclient(selclient(), 1);
 	motionnotify(0);
-}
-
-void
-unmaplayersurfacenotify(struct wl_listener *listener, void *data)
-{
-	LayerSurface *layersurface = wl_container_of(listener, layersurface, unmap);
-	unmaplayersurface(layersurface);
 }
 
 void
