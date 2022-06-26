@@ -28,7 +28,7 @@ fcitx5 -d --disable dbus
 
 #fcitx5 --verbose "*=5" -d
 
-waybar &
+waybar --log-level trace &
 
 while
 	read line; do echo $line >> ${fname} ;
