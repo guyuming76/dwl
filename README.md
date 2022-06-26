@@ -28,7 +28,7 @@ fcitx5 -d --disable dbus
 
 #fcitx5 --verbose "*=5" -d
 
-waybar &
+waybar --log-level trace &
 
 while
 	read line; do echo $line >> ${fname} ;
@@ -100,8 +100,10 @@ origin	https://gitee.com/guyuming76/dwl.git (fetch)
 origin	https://gitee.com/guyuming76/dwl.git (push)
 ```
 
-
 3. 第1步FetchUpstream后，本地 git pull github main 获取， 再通过 git push origin main 推送到 gitee，
-   也可先通过 git log origin/main..github/main 查看 gitee 和 github有啥不同 (https://www.cnblogs.com/wentaos/p/7567502.html)
+   也可先通过 git log origin/main..github/main 查看 gitee 和 github有啥不同;
+   (https://www.cnblogs.com/wentaos/p/7567502.html)
 
-4. 再切换到一个分支，比如 git checkout PR235_10, 然后 git merge main 来合并上游的更新，可能会要手工解决一些冲突.
+
+4. 再切换到一个分支，比如 git checkout PR235_10, 可以先通过 git log main ^PR235_10 查看 PR235_10 里缺哪些commit,也就是将要merge 的commit,
+   然后 git merge main 来合并上游的更新，可能会要手工解决一些冲突.
