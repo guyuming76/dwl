@@ -51,7 +51,7 @@ run dbus-run-session dwl -s ~/dwlstart.sh to start dwl. you might find that the 
 
 -------------------------------------------------------------------------------------------
 
-DWL下设置投影仪，用wlr-randr,我在gentoo上是从guru仓库安装的。wlr-randr 没有--left-of 参数，但可以用--pos设置输出起始坐标，如果投影仪和显示器起始坐标都是0,0,效果就相当于“双屏复制”显示
+DWL下设置投影仪，用wlr-randr,我在gentoo上是从guru仓库安装的。wlr-randr 貌似没有--left-of 参数，但可以用--pos设置输出起始坐标，如果投影仪和显示器起始坐标都是0,0,效果就相当于“双屏复制”显示
 
 ```
 
@@ -60,8 +60,10 @@ if [[ ${1} == "dwl" ]];then
       wlr-randr --output HDMI-A-1 --mode 1360x768
       wlr-randr --output HDMI-A-1 --pos 0,0
 elif [[ ${1} == "dwm" ]];then
-      xrandr --output HDMI-1 --mode 1280x720
-      xrandr --output HDMI-1 --left-of LVDS-1
+      xrandr --output HDMI-1 --mode 1360x768
+      #xrandr --output HDMI-1 --left-of LVDS-1
+      xrandr --output HDMI-1 --pos 0x0
+      xrandr --output LVDS-1 --pos 0x0
 else
      echo "usage: HDMI.sh dwl"
      echo "       HDMI.sh dwm"
