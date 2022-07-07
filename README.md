@@ -7,6 +7,7 @@ The command i use to start dwl from tty:
 dbus-run-session dwl -s ~/dwlstart.sh
 dbus-run-session dwl -s ~/dwlstart.sh 2>/tmp/dwlerr.log
 dbus-run-session dwl -s ~/dwlstart.sh -i 2>/tmp/dwlerr.log
+# -d level log add the keypress events based on -i level, which is large in quantity
 dbus-run-session dwl -s ~/dwlstart.sh -d 2>/tmp/dwlerr.log
 ```
 
