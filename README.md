@@ -29,7 +29,9 @@ fcitx5 -d --disable dbus
 
 #fcitx5 --verbose "*=5" -d
 
-waybar --log-level trace &
+waybar --log-level debug > /tmp/waybar.log  &
+#i cloned waybar project here:https://gitee.com/guyuming76/dwl
+#all i did is adding spdlog entries to help me understand how waybar works.
 
 while
 	read line; do echo $line >> ${fname} ;
