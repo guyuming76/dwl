@@ -1522,7 +1522,7 @@ keypress(struct wl_listener *listener, void *data)
 		wlr_log(WLR_DEBUG, "keypress send to client:%u mods %u state %u",event->keycode,mods,event->state);
 	}
 	else {
-	  wlr_log(WLR_DEBUG,"keypress handled by dwl:%u mods %u state %u",event->keycode,mods,event->state);
+	  wlr_log(WLR_INFO,"keypress handled by dwl:%u mods %u state %u",event->keycode,mods,event->state);
 	}
 }
 
@@ -2927,6 +2927,12 @@ spawn(const Arg *arg)
 	if (fork() == 0) {
 		dup2(STDERR_FILENO, STDOUT_FILENO);
 		setsid();
+		// if (((char **)arg->v)[1]) {
+		//     wlr_log(WLR_INFO,"spawn file: %s, arg: %s",((char **)arg->v)[0], ((char **)arg->v)[1]);
+		//}else{
+		     wlr_log(WLR_INFO,"spawn file: %s",((char **)arg->v)[0]); 
+		//}
+		
 		execvp(((char **)arg->v)[0], (char **)arg->v);
 		die("dwl: execvp %s failed:", ((char **)arg->v)[0]);
 	}
