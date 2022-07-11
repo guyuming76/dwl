@@ -750,6 +750,7 @@ axisnotify(struct wl_listener *listener, void *data)
 	struct wlr_event_pointer_axis *event = data;
 	wlr_idle_notify_activity(idle, seat);
 	/* Notify the client with pointer focus of the axis event. */
+        wlr_log(WLR_DEBUG,"axisnotify orientation %d delta %f" ,event->orientation,event->delta);
 	wlr_seat_pointer_notify_axis(seat,
 			event->time_msec, event->orientation, event->delta,
 			event->delta_discrete, event->source);
