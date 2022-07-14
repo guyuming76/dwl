@@ -33,7 +33,7 @@ waybar --log-level debug > /tmp/waybar.log  &
 #i cloned waybar project here:https://gitee.com/guyuming76/dwl
 #all i did is adding spdlog entries to help me understand how waybar works.
 
-eval "/home/guyuming/HDMI.sh dwl"
+eval "/home/guyuming/HDMI.sh dwl" &
 #调用脚本，用wlr-randr命令设置多显示器模式，比如让投影仪复制显示主屏幕
 
 while
