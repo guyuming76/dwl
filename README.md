@@ -33,6 +33,9 @@ waybar --log-level debug > /tmp/waybar.log  &
 #i cloned waybar project here:https://gitee.com/guyuming76/dwl
 #all i did is adding spdlog entries to help me understand how waybar works.
 
+eval "/home/guyuming/HDMI.sh dwl"
+#调用脚本，用wlr-randr命令设置多显示器模式，比如让投影仪复制显示主屏幕
+
 while
 	read line; do echo $line >> ${fname} ;
 done
@@ -59,6 +62,10 @@ DWL下设置投影仪，用wlr-randr,我在gentoo上是从guru仓库安装的。
 ```
 
 cat ~/HDMI.sh
+
+sleep 10
+#当本脚本是从 dwl -s 参数中启动得话，需要等待dwl 中 wayland 事件循环启动后才能执行 wlr-randr,所以这里sleep一会儿 https://github.com/djpohly/dwl/issues/266
+
 if [[ ${1} == "dwl" ]];then
       wlr-randr --output HDMI-A-1 --mode 1360x768
       wlr-randr --output HDMI-A-1 --pos 0,0
