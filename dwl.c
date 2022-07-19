@@ -2467,6 +2467,8 @@ static void get_parent_and_output_box(struct wlr_surface *focused_surface,
 		*parent = layer->geom;
 		parent->x += output_box_tmp->x;
 		parent->y += output_box_tmp->y;
+		wlr_log(WLR_INFO,"get_parent_and_output_box layersurface  output_box_tmp->x %d y %d",output_box_tmp->x, output_box_tmp->y);
+		wlr_log(WLR_INFO,"get_parent_and_output_box layersurface  parent->x %d y %d",parent->x,parent->y);
 	} else {
 		Client *client = client_from_wlr_surface(focused_surface);
 		output = wlr_output_layout_output_at(output_layout,
@@ -2476,6 +2478,9 @@ static void get_parent_and_output_box(struct wlr_surface *focused_surface,
 		parent->y = client->geom.y + client->bw;
 		parent->width = client->geom.width;
 		parent->height = client->geom.height;
+		wlr_log(WLR_INFO,"get_parent_and_output_box client  client->geom.x %d y %d",client->geom.x,client->geom.y);
+		wlr_log(WLR_INFO,"get_parent_and_output_box client  client->bw %d",client->bw);
+		wlr_log(WLR_INFO,"get_parent_and_output_box client  parent->x %d y %d",parent->x,parent->y);
 	}
 
 	*output_box = *output_box_tmp;
@@ -2510,8 +2515,10 @@ static void input_popup_update(struct dwl_input_popup *popup) {
 		cursor.y = 0;
 		cursor.width = parent.width;
 		cursor.height = parent.height;
+		wlr_log(WLR_INFO,"input_popup_update !cursor_rect");
 	}
 
+	wlr_log(WLR_INFO,"input_popup_update cursor x %d y %d width %d height %d",cursor.x,cursor.y,cursor.width,cursor.height);
 	popup_width = popup->popup_surface->surface->current.width;
 	popup_height = popup->popup_surface->surface->current.height;
 	x1 = parent.x + cursor.x;
@@ -2524,12 +2531,14 @@ static void input_popup_update(struct dwl_input_popup *popup) {
 	available_right = output_box.x + output_box.width - x1;
 	available_left = x2 - output_box.x;
 	if (available_right < popup_width && available_left > available_right) {
-		x = x2 - popup_width;
+	        wlr_log(WLR_INFO,"input_popup_update available right %d popup_width %d available_left %d",available_right,popup_width,available_left);
+	        x = x2 - popup_width;
 	}
 
 	available_down = output_box.y + output_box.height - y2;
 	available_up = y1 - output_box.y;
 	if (available_down < popup_height && available_up > available_down) {
+	        wlr_log(WLR_INFO,"input_popup_update available down %d popup_height %d available_up %d",available_down,popup_height,available_up);
 		y = y1 - popup_height;
 	}
 
