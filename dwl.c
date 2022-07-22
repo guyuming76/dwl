@@ -264,7 +264,7 @@ struct dwl_text_input {
 	struct wl_listener pending_focused_surface_destroy;
 
 	struct wl_listener text_input_enable;
-	struct wl_listener text_input_commit;
+  //struct wl_listener text_input_commit;
 	struct wl_listener text_input_disable;
 	struct wl_listener text_input_destroy;
 };
@@ -2332,21 +2332,21 @@ static void handle_text_input_enable(struct wl_listener *listener, void *data) {
 	relay_send_im_state(text_input->relay, text_input->input);
 }
 
-static void handle_text_input_commit(struct wl_listener *listener,
-		void *data) {
-	struct dwl_text_input *text_input = wl_container_of(listener, text_input,
-		text_input_commit);
-	if (!text_input->input->current_enabled) {
-		wlr_log(WLR_INFO, "text_input_commit but not enabled");
-		return;
-	}
-	if (text_input->relay->input_method == NULL) {
-		wlr_log(WLR_INFO, "text_input_commit but input method is NULL");
-		return;
-	}
-	wlr_log(WLR_DEBUG, "text_input_commit");
-	relay_send_im_state(text_input->relay, text_input->input);
-}
+/* static void handle_text_input_commit(struct wl_listener *listener, */
+/* 		void *data) { */
+/* 	struct dwl_text_input *text_input = wl_container_of(listener, text_input, */
+/* 		text_input_commit); */
+/* 	if (!text_input->input->current_enabled) { */
+/* 		wlr_log(WLR_INFO, "text_input_commit but not enabled"); */
+/* 		return; */
+/* 	} */
+/* 	if (text_input->relay->input_method == NULL) { */
+/* 		wlr_log(WLR_INFO, "text_input_commit but input method is NULL"); */
+/* 		return; */
+/* 	} */
+/* 	wlr_log(WLR_DEBUG, "text_input_commit"); */
+/* 	relay_send_im_state(text_input->relay, text_input->input); */
+/* } */
 
 static void relay_disable_text_input(struct dwl_input_method_relay *relay,
 		struct dwl_text_input *text_input) {
@@ -2380,7 +2380,7 @@ static void handle_text_input_destroy(struct wl_listener *listener,
         }
 	
 	text_input_set_pending_focused_surface(text_input, NULL);
-	wl_list_remove(&text_input->text_input_commit.link);
+	//wl_list_remove(&text_input->text_input_commit.link);
 	wl_list_remove(&text_input->text_input_destroy.link);
 	//wl_list_remove(&text_input->text_input_disable.link);
 	wl_list_remove(&text_input->text_input_enable.link);
@@ -2417,8 +2417,8 @@ struct dwl_text_input *dwl_text_input_create(
 	input->text_input_enable.notify = handle_text_input_enable;
 	wl_signal_add(&text_input->events.enable, &input->text_input_enable);
 
-	input->text_input_commit.notify = handle_text_input_commit;
-	wl_signal_add(&text_input->events.commit, &input->text_input_commit);
+	//input->text_input_commit.notify = handle_text_input_commit;
+	//wl_signal_add(&text_input->events.commit, &input->text_input_commit);
 
 	/* input->text_input_disable.notify = handle_text_input_disable; */
 	/* wl_signal_add(&text_input->events.disable, &input->text_input_disable); */
