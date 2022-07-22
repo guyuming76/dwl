@@ -2484,6 +2484,7 @@ static void get_parent_and_output_box(struct wlr_surface *focused_surface,
 	}
 
 	*output_box = *output_box_tmp;
+	wlr_log(WLR_INFO,"get_parent_and_output_box output_box  x %d y %d width %d height %d",output_box->x,output_box->y,output_box->width,output_box->height);
 }
 
 static void input_popup_update(struct dwl_input_popup *popup) {
@@ -2528,18 +2529,19 @@ static void input_popup_update(struct dwl_input_popup *popup) {
 	x = x1;
 	y = y2;
 
+	wlr_log(WLR_INFO,"input_popup_update  x1 %d x2 %d y1 %d y2 %d;  x %d y %d",x1,x2,y1,y2,x,y);
 	available_right = output_box.x + output_box.width - x1;
 	available_left = x2 - output_box.x;
 	if (available_right < popup_width && available_left > available_right) {
-	        wlr_log(WLR_INFO,"input_popup_update available right %d popup_width %d available_left %d",available_right,popup_width,available_left);
 	        x = x2 - popup_width;
+		wlr_log(WLR_INFO,"input_popup_update available_left %d popup_width %d available_right %d; x %d",available_left,popup_width,available_right,x);
 	}
 
 	available_down = output_box.y + output_box.height - y2;
 	available_up = y1 - output_box.y;
 	if (available_down < popup_height && available_up > available_down) {
-	        wlr_log(WLR_INFO,"input_popup_update available down %d popup_height %d available_up %d",available_down,popup_height,available_up);
 		y = y1 - popup_height;
+		wlr_log(WLR_INFO,"input_popup_update available up %d popup_height %d available_down %d; y %d",available_up,popup_height,available_down,y);
 	}
 
 	popup->x = x;
