@@ -1,0 +1,14 @@
+
+00:00:37.251 [INFO] [dwl.c:2625] IM_new_popup_surface
+00:00:37.251 [INFO] [dwl.c:2580] IM_popup_map
+00:00:37.251 [INFO] [dwl.c:2481] get_parent_and_output_box client  client->geom.x 1056 y 20
+00:00:37.251 [INFO] [dwl.c:2482] get_parent_and_output_box client  client->bw 1
+00:00:37.251 [INFO] [dwl.c:2483] get_parent_and_output_box client  parent->x 1057 y 21
+00:00:37.251 [INFO] [dwl.c:2487] get_parent_and_output_box output_box  x 0 y 0 width 1920 height 1080
+00:00:37.251 [INFO] [dwl.c:2519] input_popup_update !cursor_rect
+00:00:37.251 [INFO] [dwl.c:2522] input_popup_update cursor x 0 y 0 width 864 height 1060
+00:00:37.251 [INFO] [dwl.c:2532] input_popup_update  x1 1057 x2 1921 y1 21 y2 1081;  x 1057 y 1081
+00:00:37.251 [INFO] [dwl.c:2544] input_popup_update available up 21 popup_height 31 available_down -1; y -10
+00:00:37.251 [INFO] [dwl.c:2572] input_popup_update x 1057 y -10 visible true
+00:00:37.254 [INFO] [types/wlr_text_input_v3.c:156] text_input_set_cursor_rectangle x 541 y 484 width 0 height 1
+

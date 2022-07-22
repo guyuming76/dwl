@@ -1,6 +1,7 @@
 /*
  * see license file for copyright and license details.
  */
+#include <stdbool.h>
 #define _POSIX_C_SOURCE 200809L
 #include <assert.h>
 #include <getopt.h>
@@ -2506,10 +2507,14 @@ static void input_popup_update(struct dwl_input_popup *popup) {
 
 	cursor_rect = text_input->input->current.features
 		& WLR_TEXT_INPUT_V3_FEATURE_CURSOR_RECTANGLE;
+
 	focused_surface = text_input->input->focused_surface;
 	cursor = text_input->input->current.cursor_rectangle;
 
 	get_parent_and_output_box(focused_surface, &parent, &output_box);
+
+	popup_width = popup->popup_surface->surface->current.width;
+	popup_height = popup->popup_surface->surface->current.height;
 
 	if (!cursor_rect) {
 		cursor.x = 0;
@@ -2517,49 +2522,50 @@ static void input_popup_update(struct dwl_input_popup *popup) {
 		cursor.width = parent.width;
 		cursor.height = parent.height;
 		wlr_log(WLR_INFO,"input_popup_update !cursor_rect");
+
+		popup->x=parent.x;
+		popup->y=parent.y;
+		popup->visible=true;
 	}
+	else {
+	        wlr_log(WLR_INFO,"input_popup_update cursor x %d y %d width %d height %d",cursor.x,cursor.y,cursor.width,cursor.height);
 
-	wlr_log(WLR_INFO,"input_popup_update cursor x %d y %d width %d height %d",cursor.x,cursor.y,cursor.width,cursor.height);
-	popup_width = popup->popup_surface->surface->current.width;
-	popup_height = popup->popup_surface->surface->current.height;
-	x1 = parent.x + cursor.x;
-	x2 = parent.x + cursor.x + cursor.width;
-	y1 = parent.y + cursor.y;
-	y2 = parent.y + cursor.y + cursor.height;
-	x = x1;
-	y = y2;
+	        x1 = parent.x + cursor.x;
+	        x2 = parent.x + cursor.x + cursor.width;
+	        y1 = parent.y + cursor.y;
+	        y2 = parent.y + cursor.y + cursor.height;
+	        x = x1;
+	        y = y2;
 
-	wlr_log(WLR_INFO,"input_popup_update  x1 %d x2 %d y1 %d y2 %d;  x %d y %d",x1,x2,y1,y2,x,y);
-	available_right = output_box.x + output_box.width - x1;
-	available_left = x2 - output_box.x;
-	if (available_right < popup_width && available_left > available_right) {
-	        x = x2 - popup_width;
-		wlr_log(WLR_INFO,"input_popup_update available_left %d popup_width %d available_right %d; x %d",available_left,popup_width,available_right,x);
-	}
+	        wlr_log(WLR_INFO,"input_popup_update  x1 %d x2 %d y1 %d y2 %d;  x %d y %d",x1,x2,y1,y2,x,y);
+	        available_right = output_box.x + output_box.width - x1;
+	        available_left = x2 - output_box.x;
+	        if (available_right < popup_width && available_left > available_right) {
+	               x = x2 - popup_width;
+		       wlr_log(WLR_INFO,"input_popup_update available_left %d popup_width %d available_right %d; x %d",available_left,popup_width,available_right,x);
+	        }
 
-	available_down = output_box.y + output_box.height - y2;
-	available_up = y1 - output_box.y;
-	if (available_down < popup_height && available_up > available_down) {
-		y = y1 - popup_height;
-		wlr_log(WLR_INFO,"input_popup_update available up %d popup_height %d available_down %d; y %d",available_up,popup_height,available_down,y);
-	}
+	        available_down = output_box.y + output_box.height - y2;
+	        available_up = y1 - output_box.y;
+	        if (available_down < popup_height && available_up > available_down) {
+	              y = y1 - popup_height;
+		      wlr_log(WLR_INFO,"input_popup_update available up %d popup_height %d available_down %d; y %d",available_up,popup_height,available_down,y);
+	        }
 
-	popup->x = x;
-	popup->y = y;
+	        popup->x = x;
+	        popup->y = y;
 
-	// Hide popup if cursor position is completely out of bounds
-	x1_in_bounds = (cursor.x >= 0 && cursor.x < parent.width);
-	y1_in_bounds = (cursor.y >= 0 && cursor.y < parent.height);
-	x2_in_bounds = (cursor.x + cursor.width >= 0
-		&& cursor.x + cursor.width < parent.width);
-	y2_in_bounds = (cursor.y + cursor.height >= 0
-		&& cursor.y + cursor.height < parent.height);
-	popup->visible =
-		(x1_in_bounds && y1_in_bounds) || (x2_in_bounds && y2_in_bounds);
+         	// Hide popup if cursor position is completely out of bounds
+	        x1_in_bounds = (cursor.x >= 0 && cursor.x < parent.width);
+	        y1_in_bounds = (cursor.y >= 0 && cursor.y < parent.height);
+	        x2_in_bounds = (cursor.x + cursor.width >= 0
+		                         && cursor.x + cursor.width < parent.width);
+	        y2_in_bounds = (cursor.y + cursor.height >= 0
+		                         && cursor.y + cursor.height < parent.height);
+	        popup->visible =
+		                      (x1_in_bounds && y1_in_bounds) || (x2_in_bounds && y2_in_bounds);
 
-        
-	if (cursor_rect) {
-		struct wlr_box box = {
+                struct wlr_box box = {
 			.x = x1 - x,
 			.y = y1 - y,
 			.width = cursor.width,
@@ -2568,7 +2574,9 @@ static void input_popup_update(struct dwl_input_popup *popup) {
 		wlr_input_popup_surface_v2_send_text_input_rectangle(
 			popup->popup_surface, &box);
 		wlr_log(WLR_INFO,"input_popup_update send_text_input_rect box.x %d box.y %d",box.x,box.y);
+
 	}
+        
         wlr_log(WLR_INFO,"input_popup_update x %d y %d visible %s",popup->x,popup->y,popup->visible?"true":"false");
 	wlr_scene_node_set_position(popup->scene, popup->x, popup->y);
 }
