@@ -69,9 +69,11 @@ sleep 10
 if [[ ${1} == "dwl" ]];then
       wlr-randr --output HDMI-A-1 --mode 1360x768
       wlr-randr --output HDMI-A-1 --pos 0,0
+      #wlr-randr --output HDMI-A-1 --scale 1.5
 elif [[ ${1} == "dwm" ]];then
       xrandr --output HDMI-1 --mode 1360x768
       #xrandr --output HDMI-1 --left-of LVDS-1
+      #xrandr --output HDMI-1 --scale 0.5x0.5
       xrandr --output HDMI-1 --pos 0x0
       xrandr --output LVDS-1 --pos 0x0
 else
