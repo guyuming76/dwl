@@ -70,6 +70,7 @@ if [[ ${1} == "dwl" ]];then
       wlr-randr --output HDMI-A-1 --mode 1360x768
       wlr-randr --output HDMI-A-1 --pos 0,0
       #wlr-randr --output HDMI-A-1 --scale 1.5
+      # https://github.com/fcitx/fcitx5/discussions/551
 elif [[ ${1} == "dwm" ]];then
       xrandr --output HDMI-1 --mode 1360x768
       #xrandr --output HDMI-1 --left-of LVDS-1
