@@ -117,6 +117,7 @@ typedef struct {
 	struct wlr_scene_node *scene;
 	struct wlr_scene_rect *border[4]; /* top, bottom, left, right */
 	struct wlr_scene_node *scene_surface;
+	struct wlr_scene_rect *fullscreen_bg; /* See setfullscreen() for info */
 	struct wl_list link;
 	struct wl_list flink;
 	union {
@@ -402,6 +403,7 @@ static void zoom(const Arg *arg);
 /* variables */
 static const char broken[] = "broken";
 static pid_t child_pid = -1;
+static struct wlr_surface *exclusive_focus;
 static struct wl_display *dpy;
 static struct wlr_backend *backend;
 static struct wlr_scene *scene;
@@ -734,9 +736,12 @@ arrangelayers(Monitor *m)
 					layersurface->layer_surface->mapped) {
 				/* Deactivate the focused client. */
 				focusclient(NULL, 0);
+				exclusive_focus = layersurface->layer_surface->surface;
 				if (kb)
-					wlr_seat_keyboard_notify_enter(seat, layersurface->layer_surface->surface,
+					wlr_seat_keyboard_notify_enter(seat, exclusive_focus,
 							kb->keycodes, kb->num_keycodes, &kb->modifiers);
+				else
+					wlr_seat_keyboard_notify_enter(seat, exclusive_focus, NULL, 0, NULL);
 				return;
 			}
 		}
@@ -1256,6 +1261,9 @@ focusclient(Client *c, int lift)
 	struct wlr_surface *old = seat->keyboard_state.focused_surface;
 	struct wlr_keyboard *kb;
 	int i;
+	/* Do not focus clients if a layer surface is focused */
+	if (exclusive_focus)
+		return;
 
 	/* Raise client in stacking order if requested */
 	if (c && lift)
@@ -1318,6 +1326,8 @@ focusclient(Client *c, int lift)
 	if (kb)
 		wlr_seat_keyboard_notify_enter(seat, client_surface(c),
 				kb->keycodes, kb->num_keycodes, &kb->modifiers);
+	else
+		wlr_seat_keyboard_notify_enter(seat, client_surface(c), NULL, 0, NULL);
 
 #ifdef IM
 	dwl_input_method_relay_set_focus(input_relay, client_surface(c));
@@ -1581,8 +1591,9 @@ maplayersurfacenotify(struct wl_listener *listener, void *data)
 void
 mapnotify(struct wl_listener *listener, void *data)
 {
-        /* Called when the surface is mapped, or ready to display on-screen. */
-	Client *c = wl_container_of(listener, c, map);
+	/* Called when the surface is mapped, or ready to display on-screen. */
+	Client *p, *c = wl_container_of(listener, c, map);
+
 	int i;
 
       	wlr_log(WLR_INFO,"mapnotify");
@@ -1629,8 +1640,17 @@ mapnotify(struct wl_listener *listener, void *data)
 	wl_list_insert(&clients, &c->link);
 	wl_list_insert(&fstack, &c->flink);
 
-	/* Set initial monitor, tags, floating status, and focus */
-	applyrules(c);
+
+	if ((p = client_get_parent(c))) {
+		/* Set the same monitor and tags than its parent */
+		c->isfloating = 1;
+		wlr_scene_node_reparent(c->scene, layers[LyrFloat]);
+		setmon(c, p->mon, p->tags);
+	} else {
+	  	/* Set initial monitor, tags, floating status, and focus */
+		applyrules(c);
+	}
+	printstatus();
 
         printstatusSkip--;
 	if (c->isfullscreen)
@@ -2118,10 +2138,28 @@ setfullscreen(Client *c, int fullscreen)
 	if (fullscreen) {
 		c->prev = c->geom;
 		resize(c, c->mon->m, 0);
+		/* The xdg-protocol specifies:
+		 *
+		 * If the fullscreened surface is not opaque, the compositor must make
+		 * sure that other screen content not part of the same surface tree (made
+		 * up of subsurfaces, popups or similarly coupled surfaces) are not
+		 * visible below the fullscreened surface.
+		 *
+		 * For brevity we set a black background for all clients
+		 */
+		if (!c->fullscreen_bg) {
+			c->fullscreen_bg = wlr_scene_rect_create(c->scene,
+				c->geom.width, c->geom.height, fullscreen_bg);
+			wlr_scene_node_lower_to_bottom(&c->fullscreen_bg->node);
+		}
 	} else {
 		/* restore previous size instead of arrange for floating windows since
 		 * client positions are set by the user and cannot be recalculated */
 		resize(c, c->prev, 0);
+		if (c->fullscreen_bg) {
+			wlr_scene_node_destroy(&c->fullscreen_bg->node);
+			c->fullscreen_bg = NULL;
+		}
 	}
 
 	printstatusSkip++;
@@ -2749,6 +2787,9 @@ void dwl_input_method_relay_set_focus(struct dwl_input_method_relay *relay,
 void
 setup(void)
 {
+	/* Force line-buffered stdout */
+	setvbuf(stdout, NULL, _IOLBF, 0);
+
 	/* The Wayland display is managed by libwayland. It handles accepting
 	 * clients from the Unix socket, manging Wayland globals, and so on. */
 	dpy = wl_display_create();
@@ -3098,6 +3139,8 @@ unmaplayersurfacenotify(struct wl_listener *listener, void *data)
 	layersurface->layer_surface->mapped = (layersurface->mapped = 0);
 
 	wlr_scene_node_set_enabled(layersurface->scene, 0);
+	if (layersurface->layer_surface->surface == exclusive_focus)
+		exclusive_focus = NULL;
 	if (layersurface->layer_surface->surface ==
 			seat->keyboard_state.focused_surface)
 		focusclient(selclient(), 1);

@@ -26,6 +26,25 @@ client_surface(Client *c)
 	return c->surface.xdg->surface;
 }
 
+static inline Client *
+client_from_wlr_surface(struct wlr_surface *s)
+{
+	struct wlr_xdg_surface *surface;
+
+#ifdef XWAYLAND
+	struct wlr_xwayland_surface *xsurface;
+	if (s && wlr_surface_is_xwayland_surface(s)
+			&& (xsurface = wlr_xwayland_surface_from_wlr_surface(s)))
+		return xsurface->data;
+#endif
+	if (s && wlr_surface_is_xdg_surface(s)
+			&& (surface = wlr_xdg_surface_from_wlr_surface(s))
+			&& surface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL)
+		return surface->data;
+
+	return NULL;
+}
+
 /* The others */
 static inline void
 client_activate_surface(struct wlr_surface *s, int activated)
@@ -115,6 +134,20 @@ client_get_title(Client *c)
 		return c->surface.xwayland->title;
 #endif
 	return c->surface.xdg->toplevel->title;
+}
+
+static inline Client *
+client_get_parent(Client *c)
+{
+	Client *p;
+#ifdef XWAYLAND
+	if (client_is_x11(c) && c->surface.xwayland->parent)
+		return client_from_wlr_surface(c->surface.xwayland->parent->surface);
+#endif
+	if (c->surface.xdg->toplevel->parent)
+		return client_from_wlr_surface(c->surface.xdg->toplevel->parent->surface);
+
+	return NULL;
 }
 
 static inline int
@@ -235,35 +268,38 @@ client_restack_surface(Client *c)
 	return;
 }
 
-static inline Client *
-client_from_wlr_surface(struct wlr_surface *s)
-{
-// if we search across dwl.c with "alloc(" , we can find the lines where Client
-// is created for surface
-// in both xdg surface and xwayland surface, client = surface->data->data
-// so the commented definition which use surface->role_data->data for client is not correct.
-	struct wlr_xdg_surface *surface;
+/* <<<<<<< HEAD */
+/* static inline Client * */
+/* client_from_wlr_surface(struct wlr_surface *s) */
+/* { */
+/* // if we search across dwl.c with "alloc(" , we can find the lines where Client */
+/* // is created for surface */
+/* // in both xdg surface and xwayland surface, client = surface->data->data */
+/* // so the commented definition which use surface->role_data->data for client is not correct. */
+/* 	struct wlr_xdg_surface *surface; */
 
-#ifdef XWAYLAND
-	struct wlr_xwayland_surface *xsurface;
-	if (s->role_data && wlr_surface_is_xwayland_surface(s)
-			&& (xsurface = wlr_xwayland_surface_from_wlr_surface(s)))
-		return xsurface->data;
-#endif
-	if (s->role_data && wlr_surface_is_xdg_surface(s)
-			&& (surface = wlr_xdg_surface_from_wlr_surface(s))
-			&& surface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL)
-		return surface->data;
+/* #ifdef XWAYLAND */
+/* 	struct wlr_xwayland_surface *xsurface; */
+/* 	if (s->role_data && wlr_surface_is_xwayland_surface(s) */
+/* 			&& (xsurface = wlr_xwayland_surface_from_wlr_surface(s))) */
+/* 		return xsurface->data; */
+/* #endif */
+/* 	if (s->role_data && wlr_surface_is_xdg_surface(s) */
+/* 			&& (surface = wlr_xdg_surface_from_wlr_surface(s)) */
+/* 			&& surface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL) */
+/* 		return surface->data; */
 
-	return NULL;
-}
+/* 	return NULL; */
+/* } */
 
 
-//static inline Client *
-//client_from_popup(struct wlr_xdg_popup *popup)
-//git show  9b84940e37ec84933d1247bbf3eb76d9efe7c589
-//这个commit 把返回值从 Client* 改成 Void* 为啥？代码可读性不是更差了吗？
-//toplevel 不一定是Client 吗？
+/* //static inline Client * */
+/* //client_from_popup(struct wlr_xdg_popup *popup) */
+/* //git show  9b84940e37ec84933d1247bbf3eb76d9efe7c589 */
+/* //这个commit 把返回值从 Client* 改成 Void* 为啥？代码可读性不是更差了吗？ */
+/* //toplevel 不一定是Client 吗？ */
+/* ======= */
+/* >>>>>>> main */
 static inline void *
 toplevel_from_popup(struct wlr_xdg_popup *popup)
 {
