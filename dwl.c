@@ -1095,20 +1095,20 @@ createnotify(struct wl_listener *listener, void *data)
 
 	if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_POPUP) {
 		struct wlr_box box;
-		LayerSurface *l;
-		void *toplevel = toplevel_from_popup(xdg_surface->popup);
-        	wlr_log(WLR_INFO,"createnotify WLR_XDG_SURFACE_ROLE_POPUP");
-		
+
+                LayerSurface *l = toplevel_from_popup(xdg_surface->popup);
+                wlr_log(WLR_INFO,"createnotify WLR_XDG_SURFACE_ROLE_POPUP");
+
 		xdg_surface->surface->data = wlr_scene_xdg_surface_create(
 				xdg_surface->popup->parent->data, xdg_surface);
-		if (wlr_surface_is_layer_surface(xdg_surface->popup->parent) && (l = toplevel)
+		if (wlr_surface_is_layer_surface(xdg_surface->popup->parent) && l
 				&& l->layer_surface->current.layer < ZWLR_LAYER_SHELL_V1_LAYER_TOP)
 			wlr_scene_node_reparent(xdg_surface->surface->data, layers[LyrTop]);
-		if (!(c = toplevel) || !c->mon)
+		if (!l || !l->mon)
 			return;
-		box = c->type == LayerShell ? c->mon->m : c->mon->w;
-		box.x -= c->geom.x;
-		box.y -= c->geom.y;
+		box = l->type == LayerShell ? l->mon->m : l->mon->w;
+		box.x -= l->geom.x;
+		box.y -= l->geom.y;
 		wlr_xdg_popup_unconstrain_from_box(xdg_surface->popup, &box);
 		return;
 	} else if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_NONE){
@@ -1645,7 +1645,8 @@ mapnotify(struct wl_listener *listener, void *data)
 		/* Set the same monitor and tags than its parent */
 		c->isfloating = 1;
 		wlr_scene_node_reparent(c->scene, layers[LyrFloat]);
-		setmon(c, p->mon, p->tags);
+		/* TODO recheck if !p->mon is possible with wlroots 0.16.0 */
+		setmon(c, p->mon ? p->mon : selmon, p->tags);
 	} else {
 	  	/* Set initial monitor, tags, floating status, and focus */
 		applyrules(c);
@@ -3228,7 +3229,7 @@ urgent(struct wl_listener *listener, void *data)
 	struct wlr_xdg_activation_v1_request_activate_event *event = data;
 	Client *c = client_from_wlr_surface(event->surface);
         wlr_log(WLR_INFO,"urgent");
-	if (c != selclient()) {
+	if (c && c != selclient()) {
 		c->isurgent = 1;
 		printstatus();
 	}
