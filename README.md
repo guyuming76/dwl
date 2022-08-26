@@ -11,7 +11,6 @@ dbus-run-session dwl -s ~/dwlstart.sh -i 2>/tmp/dwlerr.log
 dbus-run-session dwl -s ~/dwlstart.sh -d 2>/tmp/dwlerr.log
 ```
 
-
 the content of dwlstart script:
 
 ```

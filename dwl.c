@@ -135,11 +135,10 @@ typedef struct {
 	struct wl_listener activate;
 	struct wl_listener configure;
 #endif
-	int bw;
+	unsigned int bw;
 	unsigned int tags;
-	int isfloating, isurgent;
+	int isfloating, isurgent, isfullscreen;
 	uint32_t resize; /* configure serial of a pending resize */
-	int isfullscreen;
 } Client;
 
 typedef struct {
@@ -496,15 +495,17 @@ struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
 void
 applybounds(Client *c, struct wlr_box *bbox)
 {
-	struct wlr_box min = {0}, max = {0};
-	client_get_size_hints(c, &max, &min);
-	/* try to set size hints */
-	c->geom.width = MAX(min.width + (2 * c->bw), c->geom.width);
-	c->geom.height = MAX(min.height + (2 * c->bw), c->geom.height);
-	if (max.width > 0 && !(2 * c->bw > INT_MAX - max.width)) // Checks for overflow
-		c->geom.width = MIN(max.width + (2 * c->bw), c->geom.width);
-	if (max.height > 0 && !(2 * c->bw > INT_MAX - max.height)) // Checks for overflow
-		c->geom.height = MIN(max.height + (2 * c->bw), c->geom.height);
+	if (!c->isfullscreen) {
+		struct wlr_box min = {0}, max = {0};
+		client_get_size_hints(c, &max, &min);
+		/* try to set size hints */
+		c->geom.width = MAX(min.width + (2 * c->bw), c->geom.width);
+		c->geom.height = MAX(min.height + (2 * c->bw), c->geom.height);
+		if (max.width > 0 && !(2 * c->bw > INT_MAX - max.width)) // Checks for overflow
+			c->geom.width = MIN(max.width + (2 * c->bw), c->geom.width);
+		if (max.height > 0 && !(2 * c->bw > INT_MAX - max.height)) // Checks for overflow
+			c->geom.height = MIN(max.height + (2 * c->bw), c->geom.height);
+	}
 
 	if (c->geom.x >= bbox->x + bbox->width)
 		c->geom.x = bbox->x + bbox->width - c->geom.width;
@@ -918,7 +919,7 @@ void
 commitnotify(struct wl_listener *listener, void *data)
 {
 	Client *c = wl_container_of(listener, c, commit);
-	struct wlr_box box;
+	struct wlr_box box = {0};
 	client_get_geometry(c, &box);
 
 	if (c->mon && !wlr_box_empty(&box) && (box.width != c->geom.width - 2 * c->bw
@@ -1021,8 +1022,10 @@ createmon(struct wl_listener *listener, void *data)
 	 * monitor) becomes available. */
 	struct wlr_output *wlr_output = data;
 	const MonitorRule *r;
-        Monitor *m = wlr_output->data = ecalloc(1, sizeof(*m));
+
         wlr_log(WLR_INFO,"createmon");
+	Client *c;
+	Monitor *m = wlr_output->data = ecalloc(1, sizeof(*m));
 
         m->wlr_output = wlr_output;
 	wlr_output_init_render(wlr_output, alloc, drw);
@@ -1068,16 +1071,6 @@ createmon(struct wl_listener *listener, void *data)
 	 */
 	m->scene_output = wlr_scene_output_create(scene, wlr_output);
 	wlr_output_layout_add_auto(output_layout, wlr_output);
-
-	/* If length == 1 we need update selmon.
-	 * Maybe it will change in run(). */
-	if (wl_list_length(&mons) == 1) {
-		Client *c;
-		selmon = m;
-		/* If there is any client, set c->mon to this monitor */
-		wl_list_for_each(c, &clients, link)
-			setmon(c, m, c->tags);
-	}
 
         printstatus();
 }
@@ -1342,9 +1335,11 @@ focusclient(Client *c, int lift)
 void
 focusmon(const Arg *arg)
 {
-	do
-		selmon = dirtomon(arg->i);
-	while (!selmon->wlr_output->enabled);
+	int i = 0, nmons = wl_list_length(&mons);
+	if (nmons)
+		do /* don't switch to disabled mons */
+			selmon = dirtomon(arg->i);
+		while (!selmon->wlr_output->enabled && i++ < nmons);
 	focusclient(focustop(selmon), 1);
 }
 
@@ -1834,34 +1829,64 @@ outputmgrapplyortest(struct wlr_output_configuration_v1 *config, int test)
 	struct wlr_output_configuration_head_v1 *config_head;
 	int ok = 1;
 
+	/* First disable outputs we need to disable */
 	wl_list_for_each(config_head, &config->heads, link) {
 		struct wlr_output *wlr_output = config_head->state.output;
-
-		wlr_output_enable(wlr_output, config_head->state.enabled);
-		if (config_head->state.enabled) {
-			if (config_head->state.mode)
-				wlr_output_set_mode(wlr_output, config_head->state.mode);
-			else
-				wlr_output_set_custom_mode(wlr_output,
-						config_head->state.custom_mode.width,
-						config_head->state.custom_mode.height,
-						config_head->state.custom_mode.refresh);
-
-			wlr_output_layout_move(output_layout, wlr_output,
-					config_head->state.x, config_head->state.y);
-			wlr_output_set_transform(wlr_output, config_head->state.transform);
-			wlr_output_set_scale(wlr_output, config_head->state.scale);
+		if (!wlr_output->enabled || config_head->state.enabled)
+			continue;
+		wlr_output_enable(wlr_output, 0);
+		if (test) {
+			ok &= wlr_output_test(wlr_output);
+			wlr_output_rollback(wlr_output);
+		} else {
+			ok &= wlr_output_commit(wlr_output);
 		}
+	}
 
-		if (!(ok = wlr_output_test(wlr_output)))
-			break;
-	}
+	/* Then enable outputs that need to */
 	wl_list_for_each(config_head, &config->heads, link) {
-		if (ok && !test)
-			wlr_output_commit(config_head->state.output);
+		struct wlr_output *wlr_output = config_head->state.output;
+		if (!config_head->state.enabled)
+			continue;
+
+		wlr_output_enable(wlr_output, 1);
+		if (config_head->state.mode)
+			wlr_output_set_mode(wlr_output, config_head->state.mode);
 		else
-			wlr_output_rollback(config_head->state.output);
+			wlr_output_set_custom_mode(wlr_output,
+					config_head->state.custom_mode.width,
+					config_head->state.custom_mode.height,
+					config_head->state.custom_mode.refresh);
+
+		wlr_output_layout_move(output_layout, wlr_output,
+				config_head->state.x, config_head->state.y);
+		wlr_output_set_transform(wlr_output, config_head->state.transform);
+		wlr_output_set_scale(wlr_output, config_head->state.scale);
+
+		if (test) {
+			ok &= wlr_output_test(wlr_output);
+			wlr_output_rollback(wlr_output);
+		} else {
+			int output_ok = 1;
+			/* If it's a custom mode to avoid an assertion failed in wlr_output_commit()
+			 * we test if that mode does not fail rather than just call wlr_output_commit().
+			 * We do not test normal modes because (at least in my hardware (@sevz17))
+			 * wlr_output_test() fails even if that mode can actually be set */
+			if (!config_head->state.mode)
+				ok &= (output_ok = wlr_output_test(wlr_output)
+						&& wlr_output_commit(wlr_output));
+			else
+				ok &= wlr_output_commit(wlr_output);
+
+			/* In custom modes we call wlr_output_test(), it it fails
+			 * we need to rollback, and normal modes seems to does not cause
+			 * assertions failed in wlr_output_commit() which rollback
+			 * the output on failure */
+			if (!output_ok)
+				wlr_output_rollback(wlr_output);
+		}
 	}
+
 	if (ok)
 		wlr_output_configuration_v1_send_succeeded(config);
 	else
@@ -3187,6 +3212,7 @@ updatemons(struct wl_listener *listener, void *data)
 	 */
 	struct wlr_output_configuration_v1 *config =
 		wlr_output_configuration_v1_create();
+	Client *c;
 	Monitor *m;
 	wlr_log(WLR_INFO,"updatemons");
         sgeom = *wlr_output_layout_get_box(output_layout, NULL);
@@ -3210,6 +3236,12 @@ updatemons(struct wl_listener *listener, void *data)
 		config_head->state.x = m->m.x;
 		config_head->state.y = m->m.y;
 	}
+
+	if (selmon && selmon->wlr_output->enabled)
+		wl_list_for_each(c, &clients, link)
+			if (!c->mon && client_is_mapped(c))
+				setmon(c, selmon, c->tags);
+
 	wlr_output_manager_v1_set_configuration(output_mgr, config);
 }
 

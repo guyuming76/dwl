@@ -30,6 +30,7 @@ static inline Client *
 client_from_wlr_surface(struct wlr_surface *s)
 {
 	struct wlr_xdg_surface *surface;
+	struct wlr_surface *parent;
 
 #ifdef XWAYLAND
 	struct wlr_xwayland_surface *xsurface;
@@ -42,6 +43,8 @@ client_from_wlr_surface(struct wlr_surface *s)
 			&& surface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL)
 		return surface->data;
 
+	if (s && wlr_surface_is_subsurface(s))
+		return client_from_wlr_surface(wlr_surface_get_root_surface(s));
 	return NULL;
 }
 
@@ -178,6 +181,16 @@ client_is_float_type(Client *c)
 	return ((min.width > 0 || min.height > 0 || max.width > 0 || max.height > 0)
 		&& (min.width == max.width || min.height == max.height))
 		|| c->surface.xdg->toplevel->parent;
+}
+
+static inline int
+client_is_mapped(Client *c)
+{
+#ifdef XWAYLAND
+	if (client_is_x11(c))
+		return c->surface.xwayland->mapped;
+#endif
+	return c->surface.xdg->mapped;
 }
 
 static inline int
