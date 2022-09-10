@@ -1,5 +1,6 @@
 
 This repository is used for my testing and fixing "text input and input method" PR for DWL and other misc. works related as well:
+DWL使用和配置方法类似DWM:https://ratfactor.com/dwm
 
 **sreenshots**
 --------------
