@@ -1,10 +1,12 @@
 
 This repository is used for my testing and fixing "text input and input method" PR for DWL and other misc. works related as well:
 
-#sreenshots
+**sreenshots**
+--------------
 ![输入图片说明](20220908_16h12m06s_grim.png)
 
-#How to start dwl
+**How to start dwl**
+--------------------
 
 The command i use to start dwl from tty:
 
@@ -47,7 +49,8 @@ done
 
 
 -------------------------------------------------------------------------------------------
-#How to install my waybar script
+**How to install my waybar script**
+-----------------------------------
 i put waybar related scripts in the following link, i think better way to clean the ~/.cache/dwltags file should be provided.
 
 https://gitee.com/guyuming76/personal/tree/dwl/gentoo/waybar-dwl
@@ -66,7 +69,8 @@ Waybar用到 spdlog ,  http://t.zoukankan.com/shuqin-p-12214439.html 提到“�
 -------------------------------------------------------------------------------------------------
 
 
-#DWL下设置投影仪
+**DWL下设置投影仪**
+-----------------
 用wlr-randr,我在gentoo上是从guru仓库安装的。wlr-randr 貌似没有--left-of 参数，但可以用--pos设置输出起始坐标，如果投影仪和显示器起始坐标都是0,0,效果就相当于“双屏复制”显示
 
 ```
@@ -94,11 +98,11 @@ fi
 ```
 
 --------------------------------------------------------------------------------------------
+**MISC**
+--------
 [合并上游更新操作步骤](stepsToMergeUpstreamMain.md)
-
 
  **另外，我不一定能及时合并Upstream的更新，关于输入法的那个pull request的代码，我加了#ifdef IM 这个编译条件，找到这个编译条件包含的代码，手工复制到上游代码理论上也行。** 
 
--------------------------------------------------------------------------------------------
 
 [History](History.md) 
