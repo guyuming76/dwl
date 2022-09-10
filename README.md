@@ -84,36 +84,6 @@ else
 fi
 ```
 
--------------------------------------------------------------------------------------------
-
-History :
-
-https://gitee.com/guyuming76/dwl/commit/59328d6ecbbef1b1cd6e5ea8d90d78ccddd5c263 （中文摘要）
-
-https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3433
-
-https://github.com/djpohly/dwl/pull/235
-
-
-
-https://gitee.com/guyuming76/dwl/tree/guyuming4/   (summary for phase PR12)
-
-https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3427
-
-https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3422
-
-https://github.com/djpohly/dwl/issues/231
-
-https://github.com/djpohly/dwl/issues/224
-
-https://github.com/fcitx/fcitx5/discussions/481
-
-https://github.com/djpohly/dwl/pull/12
-
-
-
-一些包含截屏的文档记录： https://gitee.com/guyuming76/personal/commits/dwl
-
 --------------------------------------------------------------------------------------------
 合并上游更新操作步骤：
 
@@ -144,3 +114,8 @@ origin	https://gitee.com/guyuming76/dwl.git (push)
 
 -------------------------------------------------------------------------------------------------
 Waybar用到 spdlog ,  http://t.zoukankan.com/shuqin-p-12214439.html 提到“多生产者多消费者队列 默认为阻塞模式，也可以设置为非阻塞，不过这个非阻塞的处理非常简单粗暴，就是简单的丢弃最老的日志，推荐是不要这样设置滴，一般产生阻塞的情况大概是磁盘IO打满了，出现这个情况一般是别的地方出问题了。
+
+
+-------------------------------------------------------------------------------------------
+
+[History](History.md) 
