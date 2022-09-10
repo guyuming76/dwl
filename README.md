@@ -1,7 +1,10 @@
-![输入图片说明](20220908_16h12m06s_grim.png)
 
 This repository is used for my testing and fixing "text input and input method" PR for DWL and other misc. works related as well:
 
+#sreenshots
+![输入图片说明](20220908_16h12m06s_grim.png)
+
+#How to start dwl
 
 The command i use to start dwl from tty:
 
@@ -44,7 +47,7 @@ done
 
 
 -------------------------------------------------------------------------------------------
-
+#How to install my waybar script
 i put waybar related scripts in the following link, i think better way to clean the ~/.cache/dwltags file should be provided.
 
 https://gitee.com/guyuming76/personal/tree/dwl/gentoo/waybar-dwl
@@ -57,8 +60,14 @@ https://gitee.com/guyuming76/personal/tree/dwl/gentoo/waybar-dwl
 run dbus-run-session dwl -s ~/dwlstart.sh to start dwl. you might find that the current selected tag for waybar is not highlighted, you can run ~/.cache/dwltags, the first column contains the name of your monitor. Then you can edit the waybar-dwl.sh, find the monitor= line and assign it with your monitor name.
 
 -------------------------------------------------------------------------------------------
+Waybar用到 spdlog ,  http://t.zoukankan.com/shuqin-p-12214439.html 提到“多生产者多消费者队列 默认为阻塞模式，也可以设置为非阻塞，不过这个非阻塞的处理非常简单粗暴，就是简单的丢弃最老的日志，推荐是不要这样设置滴，一般产生阻塞的情况大概是磁盘IO打满了，出现这个情况一般是别的地方出问题了。
 
-DWL下设置投影仪，用wlr-randr,我在gentoo上是从guru仓库安装的。wlr-randr 貌似没有--left-of 参数，但可以用--pos设置输出起始坐标，如果投影仪和显示器起始坐标都是0,0,效果就相当于“双屏复制”显示
+
+-------------------------------------------------------------------------------------------------
+
+
+#DWL下设置投影仪
+用wlr-randr,我在gentoo上是从guru仓库安装的。wlr-randr 貌似没有--left-of 参数，但可以用--pos设置输出起始坐标，如果投影仪和显示器起始坐标都是0,0,效果就相当于“双屏复制”显示
 
 ```
 
@@ -85,36 +94,10 @@ fi
 ```
 
 --------------------------------------------------------------------------------------------
-合并上游更新操作步骤：
-
-1.从 https://github.com/guyuming76/dwl  可以看出上游 https://github.com/djpohly/dwl 有没有新的commit, 如有，可以通过 FetchUpstream 同步;
-
-2.本地remote设置如下(remote 名称可以随意取，比如我在另一台机器上github对应的叫origin)：
-
-```
-gym@gymDeskGentoo ~/dwl $ git remote -v
-github	https://github.com/guyuming76/dwl.git (fetch)
-github	https://github.com/guyuming76/dwl.git (push)
-origin	https://gitee.com/guyuming76/dwl.git (fetch)
-origin	https://gitee.com/guyuming76/dwl.git (push)
-```
-
-3. 第1步FetchUpstream后，本地 git pull github main 获取， 再通过 git push origin main 推送到 gitee，
-   也可先通过 git log origin/main..github/main 查看 gitee 和 github有啥不同;
-   (https://www.cnblogs.com/wentaos/p/7567502.html)
-
-
-4. 再切换到一个分支，比如 git checkout PR235_10, 可以先通过 git log main ^PR235_10 查看 PR235_10 里缺哪些commit,也就是将要merge 的commit,
-   然后 git merge main 来合并上游的更新，可能会要手工解决一些冲突.
-
-我之所以又是从github fork, 又是本地 push 到 gitee, 主要是在 github fork 上 push 的时候，说安全策略改了，用户名密码登录不能push,要access token 啥的，然后操作指南链接又打不开。相比起来，gitee在国内访问稳定迅速，用户名密码认证后push也很方便
+[合并上游更新操作步骤](stepsToMergeUpstreamMain.md)
 
 
  **另外，我不一定能及时合并Upstream的更新，关于输入法的那个pull request的代码，我加了#ifdef IM 这个编译条件，找到这个编译条件包含的代码，手工复制到上游代码理论上也行。** 
-
--------------------------------------------------------------------------------------------------
-Waybar用到 spdlog ,  http://t.zoukankan.com/shuqin-p-12214439.html 提到“多生产者多消费者队列 默认为阻塞模式，也可以设置为非阻塞，不过这个非阻塞的处理非常简单粗暴，就是简单的丢弃最老的日志，推荐是不要这样设置滴，一般产生阻塞的情况大概是磁盘IO打满了，出现这个情况一般是别的地方出问题了。
-
 
 -------------------------------------------------------------------------------------------
 
