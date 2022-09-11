@@ -9,7 +9,7 @@ DWL使用和配置方法类似DWM:https://ratfactor.com/dwm
 geogebra 目前用xwayland,和fcitx5拼音输入的通讯依靠dbus
 
 ![输入图片说明](20220910_10h16m58s_grim.png)
-kde, gnome下的文件管理器通常会带很多桌面环境依赖项.我除了用ranger,发现rfm挺好的，suckless的风格。配合imv看图，空下来添加个功能，在rfm里选择不同图片文件时，同步更新imv。
+kde, gnome下的文件管理器通常会带很多桌面环境依赖项.我除了用ranger,发现rfm挺好的，suckless的风格。配合imv看图,我做了一个小的配置改动，添加了一段小脚本，以便每次双击图片缩略图时不用打开新的IMV窗口，而是刷新现有窗口 : https://gitee.com/guyuming76/rfm/commit/c2bdc92c6b50f578032f2986dc40db8781dfb8ac 。我觉得这个例子比较好地体现了我对动态平铺窗口管理的理解：把传统的庞大的GUI应用分拆成小的独立应用。
 
 **How to start dwl**
 --------------------
