@@ -3,6 +3,8 @@ This repository is used for my testing and fixing "text input and input method" 
 
 DWL使用和配置方法类似DWM:https://ratfactor.com/dwm
 
+另外我解释下这里的文档为啥一会儿英文，一会儿中文：最初这个代码源自github上dwl的一个pull request. 然后我好多问题搞不定，要去问原作者(详见History部分)，所以必须是英文。后来又添加了一些围绕dwl使用的相关指南，觉得中文读写都省力些，事后也懒得再翻一遍英文了。总之这个文档就是我今天改一点，明天改一点，七拼八凑的。
+
 **sreenshots**
 --------------
 ![输入图片说明](20220908_16h12m06s_grim.png)
