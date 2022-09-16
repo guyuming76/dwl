@@ -1,9 +1,11 @@
 /*
  * see license file for copyright and license details.
  */
+
+#ifdef IM
 #include <stdbool.h>
-#define _POSIX_C_SOURCE 200809L
 #include <assert.h>
+#endif
 #include <getopt.h>
 #include <libinput.h>
 #include <limits.h>
@@ -612,17 +614,17 @@ arrange(Monitor *m)
 {
 	Client *c;
         wlr_log(WLR_INFO,"arrange"); 
-        wl_list_for_each(c, &clients, link)
-		wlr_scene_node_set_enabled(c->scene, VISIBLEON(c, c->mon));
+	wl_list_for_each(c, &clients, link)
+		if (c->mon == m)
+			wlr_scene_node_set_enabled(c->scene, VISIBLEON(c, m));
 
-	if (m->lt[m->sellt]->arrange){
+	if (m && m->lt[m->sellt]->arrange)
 		m->lt[m->sellt]->arrange(m);
 #ifdef IM
 	        if (input_relay && input_relay->popup)
 		        input_popup_update(input_relay->popup);
 #endif
 
-	}
 	/* TODO recheck pointer focus here... or in resize()? */
 	motionnotify(0);
 }
@@ -916,7 +918,7 @@ commitlayersurfacenotify(struct wl_listener *listener, void *data)
 	if (!wlr_output || !(layersurface->mon = wlr_output->data))
 		return;
 
-	if (layers[wlr_layer_surface->current.layer] != layersurface->scene) {
+	if (layers[wlr_layer_surface->current.layer] != layersurface->scene->parent) {
 		wlr_scene_node_reparent(layersurface->scene,
 				layers[wlr_layer_surface->current.layer]);
 		wl_list_remove(&layersurface->link);
@@ -1389,14 +1391,7 @@ void
 fullscreennotify(struct wl_listener *listener, void *data)
 {
 	Client *c = wl_container_of(listener, c, fullscreen);
-	int fullscreen = client_wants_fullscreen(c);
-
-	if (!c->mon) {
-		/* if the client is not mapped yet, let mapnotify() call setfullscreen() */
-		c->isfullscreen = fullscreen;
-		return;
-	}
-	setfullscreen(c, fullscreen);
+	setfullscreen(c, client_wants_fullscreen(c));
 }
 
 void
@@ -2053,6 +2048,8 @@ resize(Client *c, struct wlr_box geo, int interact)
 	wlr_scene_node_set_position(&c->border[1]->node, 0, c->geom.height - c->bw);
 	wlr_scene_node_set_position(&c->border[2]->node, 0, c->bw);
 	wlr_scene_node_set_position(&c->border[3]->node, c->geom.width - c->bw, c->bw);
+	if (c->fullscreen_bg)
+		wlr_scene_rect_set_size(c->fullscreen_bg, c->geom.width, c->geom.height);
 
 	/* wlroots makes this a no-op if size hasn't changed */
 	c->resize = client_set_size(c, c->geom.width - 2 * c->bw,
@@ -2235,6 +2232,7 @@ setmon(Client *c, Monitor *m, unsigned int newtags)
 	if (oldmon == m)
 		return;
 	c->mon = m;
+	c->prev = c->geom;
 
 	/* TODO leave/enter is not optimal but works */
 	if (oldmon) {
