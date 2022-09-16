@@ -303,6 +303,7 @@ static void arrangelayers(Monitor *m);
 static void axisnotify(struct wl_listener *listener, void *data);
 static void buttonpress(struct wl_listener *listener, void *data);
 static void chvt(const Arg *arg);
+static void checkidleinhibitor(struct wlr_surface *exclude);
 static void cleanup(void);
 static void cleanupkeyboard(struct wl_listener *listener, void *data);
 static void cleanupmon(struct wl_listener *listener, void *data);
@@ -714,7 +715,6 @@ arrangelayers(Monitor *m)
 		ZWLR_LAYER_SHELL_V1_LAYER_TOP,
 	};
 	LayerSurface *layersurface;
-	struct wlr_keyboard *kb = wlr_seat_get_keyboard(seat);
 
 	/* Arrange exclusive surfaces from top->bottom */
 	for (i = 3; i >= 0; i--)
@@ -738,11 +738,7 @@ arrangelayers(Monitor *m)
 				/* Deactivate the focused client. */
 				focusclient(NULL, 0);
 				exclusive_focus = layersurface->layer_surface->surface;
-				if (kb)
-					wlr_seat_keyboard_notify_enter(seat, exclusive_focus,
-							kb->keycodes, kb->num_keycodes, &kb->modifiers);
-				else
-					wlr_seat_keyboard_notify_enter(seat, exclusive_focus, NULL, 0, NULL);
+				client_notify_enter(exclusive_focus, wlr_seat_get_keyboard(seat));
 				return;
 			}
 		}
@@ -815,6 +811,25 @@ void
 chvt(const Arg *arg)
 {
 	wlr_session_change_vt(wlr_backend_get_session(backend), arg->ui);
+}
+
+void
+checkidleinhibitor(struct wlr_surface *exclude)
+{
+	Client *c, *w;
+	int inhibited = 0;
+	struct wlr_idle_inhibitor_v1 *inhibitor;
+	wl_list_for_each(inhibitor, &idle_inhibit_mgr->inhibitors, link) {
+		c = client_from_wlr_surface(inhibitor->surface);
+		if (exclude && (!(w = client_from_wlr_surface(exclude)) || w == c))
+			continue;
+		if (!c || VISIBLEON(c, c->mon)) {
+			inhibited = 1;
+			break;
+		}
+	}
+
+	wlr_idle_set_enabled(idle, NULL, !inhibited);
 }
 
 void
@@ -939,7 +954,7 @@ createidleinhibitor(struct wl_listener *listener, void *data)
 	struct wlr_idle_inhibitor_v1 *idle_inhibitor = data;
 	wl_signal_add(&idle_inhibitor->events.destroy, &idle_inhibitor_destroy);
 
-	wlr_idle_set_enabled(idle, seat, 0);
+	checkidleinhibitor(NULL);
 }
 
 void
@@ -1181,9 +1196,9 @@ cursorframe(struct wl_listener *listener, void *data)
 void
 destroyidleinhibitor(struct wl_listener *listener, void *data)
 {
-	/* I've been testing and at this point the inhibitor has not yet been
-	 * removed from the list, checking if it has at least one item. */
-	wlr_idle_set_enabled(idle, seat, wl_list_length(&idle_inhibit_mgr->inhibitors) <= 1);
+	/* `data` is the wlr_surface of the idle inhibitor being destroyed,
+	 * at this point the idle inhibitor is still in the list of the manager */
+	checkidleinhibitor(data);
 }
 
 void
@@ -1252,7 +1267,6 @@ void
 focusclient(Client *c, int lift)
 {
 	struct wlr_surface *old = seat->keyboard_state.focused_surface;
-	struct wlr_keyboard *kb;
 	int i;
 	/* Do not focus clients if a layer surface is focused */
 	if (exclusive_focus)
@@ -1303,7 +1317,8 @@ focusclient(Client *c, int lift)
 		}
 	}
 
-	wlr_idle_set_enabled(idle, seat, wl_list_empty(&idle_inhibit_mgr->inhibitors));
+	printstatus();
+	checkidleinhibitor(NULL);
 
 	if (!c) {
 		/* With no client, all we have left is to clear focus */
@@ -1315,12 +1330,7 @@ focusclient(Client *c, int lift)
 	}
 
 	/* Have a client, so focus its top-level wlr_surface */
-	kb = wlr_seat_get_keyboard(seat);
-	if (kb)
-		wlr_seat_keyboard_notify_enter(seat, client_surface(c),
-				kb->keycodes, kb->num_keycodes, &kb->modifiers);
-	else
-		wlr_seat_keyboard_notify_enter(seat, client_surface(c), NULL, 0, NULL);
+	client_notify_enter(client_surface(c), wlr_seat_get_keyboard(seat));
 
 #ifdef IM
 	dwl_input_method_relay_set_focus(input_relay, client_surface(c));
