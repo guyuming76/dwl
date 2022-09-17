@@ -8,6 +8,7 @@ DWL使用和配置方法类似DWM:https://ratfactor.com/dwm
 **sreenshots**
 ------------------------
 ![输入图片说明](20220908_16h12m06s_grim.png)
+![输入图片说明](20220917_18h37m45s_grim.png)
 
 geogebra 目前用xwayland,和fcitx5拼音输入的通讯依靠dbus。不过我觉得在xwayland下用，xwayland和wayland的交互看上去还是挺复杂的，如果遇到啥问题，我也是觉得在另外的TTY里打开一个DWM用比较省事，也就懒得琢磨DWL里xwayland这一块了。
 
