@@ -1050,11 +1050,10 @@ createmon(struct wl_listener *listener, void *data)
 	 * monitor) becomes available. */
 	struct wlr_output *wlr_output = data;
 	const MonitorRule *r;
-
-        wlr_log(WLR_INFO,"createmon");
-	Client *c;
 	size_t i;
+
 	Monitor *m = wlr_output->data = ecalloc(1, sizeof(*m));
+        wlr_log(WLR_INFO,"createmon");
 
         m->wlr_output = wlr_output;
 	wlr_output_init_render(wlr_output, alloc, drw);
