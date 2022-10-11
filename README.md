@@ -14,7 +14,7 @@ geogebra 目前用xwayland,和fcitx5拼音输入的通讯依靠dbus。不过我�
 
 ![输入图片说明](20220910_10h16m58s_grim.png)
 kde, gnome下的文件管理器通常会带很多桌面环境依赖项.我除了用ranger,发现rfm挺好的，suckless的风格。配合imv看图,我做了一个小的配置改动，添加了一段小脚本，以便每次双击图片缩略图时不用打开新的IMV窗口，而是刷新现有窗口 : https://gitee.com/guyuming76/rfm/commit/c2bdc92c6b50f578032f2986dc40db8781dfb8ac 。我觉得这个例子比较好地体现了我对动态平铺窗口管理的理解：把传统的庞大的GUI应用分拆成小的独立应用。
-（更新2022/10/11：深入阅读rfm代码后，发觉同步线程时没用锁，用了几个变量设置状态，(我觉得有些不保险)[https://github.com/padgettr/rfm/issues/3]，考虑要不要重写这一块，不知道其他主流文件管理器这一块怎么做的）
+（更新2022/10/11：深入阅读rfm代码后，发觉同步线程时没用锁，用了几个变量设置状态，[我觉得有些不保险](https://github.com/padgettr/rfm/issues/3)，考虑要不要重写这一块，不知道其他主流文件管理器这一块怎么做的）
 
 **How to start dwl**
 --------------------
