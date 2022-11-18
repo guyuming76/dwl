@@ -30,11 +30,15 @@ export XMODIFIERS=@im=none
 export _JAVA_AWT_WM_NONREPARENTING=1
 
 dbus-run-session dwl -s ~/dwlstart.sh -d  2>/tmp/dwl.log
+# 可以在一个命令行窗口运行 tail -f /tmp/dwl.log 查看日志
+
 #dbus-run-session dwl -s ~/dwlstart.sh -i  2>/tmp/dwl.log
+# -d level log add the keypress events based on -i level, which is large in quantity
+# -d 参数在 -i 水平的基础上再加上 keypress 事件，日志量会大许多
+
 #WAYLAND_DEBUG=1 dbus-run-session dwl -s ~/dwlstart.sh -i  2>/tmp/dwl.log
 #dbus-run-session dwl -s ~/dwlstart.sh -i
 #dbus-run-session dwl -s ~/dwlstart.sh -i 2>/dev/tty2
-# -d level log add the keypress events based on -i level, which is large in quantity
 
 ```
 
