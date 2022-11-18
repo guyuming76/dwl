@@ -22,11 +22,20 @@ kde, gnome下的文件管理器通常会带很多桌面环境依赖项.我除了
 The command i use to start dwl from tty:
 
 ```
-dbus-run-session dwl -s ~/dwlstart.sh
-dbus-run-session dwl -s ~/dwlstart.sh 2>/tmp/dwlerr.log
-dbus-run-session dwl -s ~/dwlstart.sh -i 2>/tmp/dwlerr.log
+gym@gymDeskGentoo ~ $ cat ./dwl.sh
+export GTK_IM_MODULE="wayland"
+export QT_IM_MODULE=compose
+export XMODIFIERS=@im=none
+
+export _JAVA_AWT_WM_NONREPARENTING=1
+
+dbus-run-session dwl -s ~/dwlstart.sh -d  2>/tmp/dwl.log
+#dbus-run-session dwl -s ~/dwlstart.sh -i  2>/tmp/dwl.log
+#WAYLAND_DEBUG=1 dbus-run-session dwl -s ~/dwlstart.sh -i  2>/tmp/dwl.log
+#dbus-run-session dwl -s ~/dwlstart.sh -i
+#dbus-run-session dwl -s ~/dwlstart.sh -i 2>/dev/tty2
 # -d level log add the keypress events based on -i level, which is large in quantity
-dbus-run-session dwl -s ~/dwlstart.sh -d 2>/tmp/dwlerr.log
+
 ```
 
 the content of dwlstart script:
