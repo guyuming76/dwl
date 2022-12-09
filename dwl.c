@@ -1152,6 +1152,9 @@ createnotify(struct wl_listener *listener, void *data)
                 LayerSurface *l = toplevel_from_popup(xdg_surface->popup);
                 wlr_log(WLR_INFO,"createnotify WLR_XDG_SURFACE_ROLE_POPUP");
 
+		if (!xdg_surface->popup->parent)
+			return;
+
 		xdg_surface->surface->data = wlr_scene_xdg_surface_create(
 				xdg_surface->popup->parent->data, xdg_surface);
 		/* Probably the check of `l` is useless, the only thing that can be NULL
@@ -3102,9 +3105,6 @@ void
 startdrag(struct wl_listener *listener, void *data)
 {
 	struct wlr_drag *drag = data;
-	/* During drag the focus isn't sent to clients, this causes that
-	 * we don't update border color acording the pointer coordinates */
-	focusclient(NULL, 0);
 
 	if (!drag->icon)
 		return;
