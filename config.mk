@@ -1,4 +1,4 @@
-_VERSION = 0.3.1-dev
+_VERSION = 0.4-rc1
 VERSION  = `git describe --long --tags --dirty 2>/dev/null || echo $(_VERSION)`
 
 PKG_CONFIG = pkg-config
@@ -11,7 +11,8 @@ CFLAGS = -g -O0
 
 XWAYLAND =
 #XWAYLAND = -DXWAYLAND
+
 XLIBS =
-#XLIBS = xcb
+#XLIBS = xcb xcb-icccm
 #IM =
 IM = -DIM
