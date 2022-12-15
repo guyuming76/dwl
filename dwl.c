@@ -2618,7 +2618,7 @@ static LayerSurface* layer_surface_from_wlr_layer_surface_v1(
 static void get_parent_and_output_box(struct wlr_surface *focused_surface,
 		struct wlr_box *parent, struct wlr_box *output_box) {
 	struct wlr_output *output;
-	struct wlr_box *output_box_tmp;
+	struct wlr_box output_box_tmp;
 
 	if (wlr_surface_is_layer_surface(focused_surface)) {
 		struct wlr_layer_surface_v1 *layer_surface =
@@ -2626,11 +2626,11 @@ static void get_parent_and_output_box(struct wlr_surface *focused_surface,
 		LayerSurface* layer =
 			layer_surface_from_wlr_layer_surface_v1(layer_surface);
 		output = layer->layer_surface->output;
-		wlr_output_layout_get_box(output_layout, output,output_box_tmp);
+		wlr_output_layout_get_box(output_layout, output,&output_box_tmp);
 		*parent = layer->geom;
-		parent->x += output_box_tmp->x;
-		parent->y += output_box_tmp->y;
-		wlr_log(WLR_INFO,"get_parent_and_output_box layersurface  output_box_tmp->x %d y %d",output_box_tmp->x, output_box_tmp->y);
+		parent->x += output_box_tmp.x;
+		parent->y += output_box_tmp.y;
+		wlr_log(WLR_INFO,"get_parent_and_output_box layersurface  output_box_tmp->x %d y %d",output_box_tmp.x, output_box_tmp.y);
 		wlr_log(WLR_INFO,"get_parent_and_output_box layersurface  parent->x %d y %d",parent->x,parent->y);
 	} else {
 	       //Client *client = client_from_wlr_surface(focused_surface);
@@ -2640,7 +2640,7 @@ static void get_parent_and_output_box(struct wlr_surface *focused_surface,
 		
 		output = wlr_output_layout_output_at(output_layout,
 			client->geom.x, client->geom.y);
-		wlr_output_layout_get_box(output_layout, output,output_box_tmp);
+		wlr_output_layout_get_box(output_layout, output,&output_box_tmp);
 		parent->x = client->geom.x + client->bw;
 		parent->y = client->geom.y + client->bw;
 		parent->width = client->geom.width;
@@ -2650,7 +2650,7 @@ static void get_parent_and_output_box(struct wlr_surface *focused_surface,
 		wlr_log(WLR_INFO,"get_parent_and_output_box client  parent->x %d y %d",parent->x,parent->y);
 	}
 
-	*output_box = *output_box_tmp;
+	*output_box = output_box_tmp;
 	wlr_log(WLR_INFO,"get_parent_and_output_box output_box  x %d y %d width %d height %d",output_box->x,output_box->y,output_box->width,output_box->height);
 }
 
