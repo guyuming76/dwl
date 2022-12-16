@@ -2641,16 +2641,19 @@ static void get_parent_and_output_box(struct wlr_surface *focused_surface,
 		output = wlr_output_layout_output_at(output_layout,
 			client->geom.x, client->geom.y);
 		wlr_output_layout_get_box(output_layout, output,&output_box_tmp);
+		
 		parent->x = client->geom.x + client->bw;
 		parent->y = client->geom.y + client->bw;
 		parent->width = client->geom.width;
 		parent->height = client->geom.height;
+		wlr_log(WLR_INFO,"get_parent_and_output_box client  output_box_tmp->x %d y %d",output_box_tmp.x, output_box_tmp.y);
 		wlr_log(WLR_INFO,"get_parent_and_output_box client  client->geom.x %d y %d",client->geom.x,client->geom.y);
 		wlr_log(WLR_INFO,"get_parent_and_output_box client  client->bw %d",client->bw);
 		wlr_log(WLR_INFO,"get_parent_and_output_box client  parent->x %d y %d",parent->x,parent->y);
 	}
 
-	*output_box = output_box_tmp;
+	//*output_box = output_box_tmp;
+	memcpy(output_box,&output_box_tmp,sizeof(struct wlr_box));
 	wlr_log(WLR_INFO,"get_parent_and_output_box output_box  x %d y %d width %d height %d",output_box->x,output_box->y,output_box->width,output_box->height);
 }
 
