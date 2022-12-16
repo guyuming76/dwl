@@ -2950,9 +2950,6 @@ setup(void)
 	/* Initialize the scene graph used to lay out windows */
 	scene = wlr_scene_create();
 
-#ifdef IM
-        layers[LyrIMPopup] = wlr_scene_tree_create(&scene->tree);
-#endif
 	layers[LyrBg] = wlr_scene_tree_create(&scene->tree);
 	layers[LyrBottom] = wlr_scene_tree_create(&scene->tree);
 	layers[LyrTile] = wlr_scene_tree_create(&scene->tree);
@@ -2960,6 +2957,11 @@ setup(void)
 	layers[LyrFS] = wlr_scene_tree_create(&scene->tree);
 	layers[LyrTop] = wlr_scene_tree_create(&scene->tree);
 	layers[LyrOverlay] = wlr_scene_tree_create(&scene->tree);
+
+#ifdef IM
+        layers[LyrIMPopup] = wlr_scene_tree_create(&scene->tree);
+#endif
+
 	layers[LyrDragIcon] = wlr_scene_tree_create(&scene->tree);
 	layers[LyrBlock] = wlr_scene_tree_create(&scene->tree);
 
