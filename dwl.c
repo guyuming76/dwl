@@ -167,6 +167,11 @@ typedef struct {
 	struct wl_list link;
 	struct wlr_keyboard *wlr_keyboard;
 
+	int nsyms;
+	const xkb_keysym_t *keysyms; /* invalid if nsyms == 0 */
+	uint32_t mods; /* invalid if nsyms == 0 */
+	struct wl_event_source *key_repeat_source;
+
 	struct wl_listener modifiers;
 	struct wl_listener key;
 	struct wl_listener destroy;
@@ -358,6 +363,7 @@ static void inputdevice(struct wl_listener *listener, void *data);
 static int keybinding(uint32_t mods, xkb_keysym_t sym);
 static void keypress(struct wl_listener *listener, void *data);
 static void keypressmod(struct wl_listener *listener, void *data);
+static int keyrepeat(void *data);
 static void killclient(const Arg *arg);
 static void locksession(struct wl_listener *listener, void *data);
 static void maplayersurfacenotify(struct wl_listener *listener, void *data);
@@ -806,6 +812,7 @@ cleanupkeyboard(struct wl_listener *listener, void *data)
 {
 	Keyboard *kb = wl_container_of(listener, kb, destroy);
 
+	wl_event_source_remove(kb->key_repeat_source);
 	wl_list_remove(&kb->link);
 	wl_list_remove(&kb->modifiers.link);
 	wl_list_remove(&kb->key.link);
@@ -950,6 +957,9 @@ createkeyboard(struct wlr_keyboard *keyboard)
 	LISTEN(&keyboard->base.events.destroy, &kb->destroy, cleanupkeyboard);
 
 	wlr_seat_set_keyboard(seat, keyboard);
+
+	kb->key_repeat_source = wl_event_loop_add_timer(
+			wl_display_get_event_loop(dpy), keyrepeat, kb);
 
 	/* And add the keyboard to our list of keyboards */
 	wl_list_insert(&keyboards, &kb->link);
@@ -1594,6 +1604,17 @@ keypress(struct wl_listener *listener, void *data)
 	else if (input_inhibit_mgr->active_inhibitor)
 	  {wlr_log(WLR_INFO,"keypress with active_inhibitor keycode %u mods %u",event->keycode, mods);}
 
+	if (handled && kb->wlr_keyboard->repeat_info.delay > 0) {
+		kb->mods = mods;
+		kb->keysyms = syms;
+		kb->nsyms = nsyms;
+		wl_event_source_timer_update(kb->key_repeat_source,
+				kb->wlr_keyboard->repeat_info.delay);
+	} else {
+		kb->nsyms = 0;
+		wl_event_source_timer_update(kb->key_repeat_source, 0);
+	}
+
 	if (!handled) {
 #ifdef IM
 	  /* if there is a keyboard grab, we send the key there */
@@ -1645,6 +1666,22 @@ keypressmod(struct wl_listener *listener, void *data)
 	/* Send modifiers to the client. */
 	wlr_seat_keyboard_notify_modifiers(seat,&kb->wlr_keyboard->modifiers);
 	wlr_log(WLR_DEBUG, "keypressmod send to client");
+}
+
+int
+keyrepeat(void *data)
+{
+	Keyboard *kb = data;
+	int i;
+	if (kb->nsyms && kb->wlr_keyboard->repeat_info.rate > 0) {
+		wl_event_source_timer_update(kb->key_repeat_source,
+				1000 / kb->wlr_keyboard->repeat_info.rate);
+
+		for (i = 0; i < kb->nsyms; i++)
+			keybinding(kb->mods, kb->keysyms[i]);
+	}
+
+	return 0;
 }
 
 void
