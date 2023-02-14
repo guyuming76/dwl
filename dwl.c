@@ -222,6 +222,7 @@ typedef struct {
 	float scale;
 	const Layout *lt;
 	enum wl_output_transform rr;
+	int x, y;
 } MonitorRule;
 
 typedef struct {
@@ -1050,6 +1051,8 @@ createmon(struct wl_listener *listener, void *data)
 			wlr_xcursor_manager_load(cursor_mgr, r->scale);
 			m->lt[0] = m->lt[1] = r->lt;
 			wlr_output_set_transform(wlr_output, r->rr);
+			m->m.x = r->x;
+			m->m.y = r->y;
 			break;
 		}
 	}
@@ -1094,9 +1097,14 @@ createmon(struct wl_listener *listener, void *data)
 	 * output (such as DPI, scale factor, manufacturer, etc).
 	 */
 	m->scene_output = wlr_scene_output_create(scene, wlr_output);
-	wlr_output_layout_add_auto(output_layout, wlr_output);
 
-        printstatus();
+	if (m->m.x < 0 || m->m.y < 0)
+		wlr_output_layout_add_auto(output_layout, wlr_output);
+	else
+		wlr_output_layout_add(output_layout, wlr_output, m->m.x, m->m.y);
+
+	//printstatus();
+
 }
 
 void
