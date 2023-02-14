@@ -129,3 +129,8 @@ fi
 
 
 [History](History.md) 
+
+fixDnD 是最后一个支持 wlroots 0.15 的分支，后面的分支，比如V0.4, 基于wlroots 0.16
+
+看图片软件:imv
+看视频软件:mpv
