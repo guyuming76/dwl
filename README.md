@@ -27,6 +27,8 @@ export GTK_IM_MODULE="wayland"
 export QT_IM_MODULE=compose
 export XMODIFIERS=@im=none
 
+export LC_TIME="zh_CN.utf8"
+
 export _JAVA_AWT_WM_NONREPARENTING=1
 
 dbus-run-session dwl -s ~/dwlstart.sh -d  2>/tmp/dwl.log
