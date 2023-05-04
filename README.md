@@ -22,7 +22,25 @@ kde, gnome下的文件管理器通常会带很多桌面环境依赖项.我除了
 The command i use to start dwl from tty:
 
 ```
+guyuming@localhost ~/dwl $ cat ~/xdg_run_user
+# Configuration  because seatd does not do this for wayland compositor
+YOUR_USER=$(id -u)
+YOUR_GROUP=$(id -g)
+
+XDG_RUNTIME_DIR=/run/user/$YOUR_USER
+
+## Delete existing directory, create a new one and set permissions
+sudo rm -rf $XDG_RUNTIME_DIR
+sudo mkdir -p $XDG_RUNTIME_DIR
+sudo chown $YOUR_USER:$YOUR_GROUP $XDG_RUNTIME_DIR
+sudo chmod 700 $XDG_RUNTIME_DIR
+
 gym@gymDeskGentoo ~ $ cat ./dwl.sh
+
+./xdg_run_user
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+#我今天把系统从 openrc+elogind 换成openrc+seatd,结果发现系统启动后没有 /run/user 目录，也没有设置XDG_RUNTIME_DIR,所以添加了上面两行。不是这个情况得话，上面可以注释掉
+
 export GTK_IM_MODULE="wayland"
 export QT_IM_MODULE=compose
 export XMODIFIERS=@im=none
