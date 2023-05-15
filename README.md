@@ -37,7 +37,7 @@ sudo chmod 700 $XDG_RUNTIME_DIR
 
 gym@gymDeskGentoo ~ $ cat ./dwl.sh
 
-./xdg_run_user
+~/xdg_run_user
 export XDG_RUNTIME_DIR=/run/user/$(id -u)
 #我今天把系统从 openrc+elogind 换成openrc+seatd,结果发现系统启动后没有 /run/user 目录，也没有设置XDG_RUNTIME_DIR,所以添加了上面两行。不是这个情况得话，上面可以注释掉
 
