@@ -147,6 +147,8 @@ fi
 
  **另外，我不一定能及时合并Upstream的更新，关于输入法的那个pull request的代码，我加了#ifdef IM 这个编译条件，找到这个编译条件包含的代码，手工复制到上游代码理论上也行。** 
 
+在wayland下使用 sudo 运行图形界面程序，比如当我用guyuming登录时,wpa_gui里面控件显示数据为空，而 `sudo wpa_gui` 会报错，但是 `sudo -EH wpa_gui` 就可以了。[参见](https://unix.stackexchange.com/questions/422040/will-wayland-ever-support-graphical-sudo) 
+
 
 [History](History.md) 
 
