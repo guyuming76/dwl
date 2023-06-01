@@ -8,7 +8,7 @@
             },
 
            "custom/sleep": {
-                 "on-click": "/usr/bin/sleep.sh",
+                 "on-click": "sudo /usr/bin/sleep.sh",
                  "format": " sleep "
            },
 
