@@ -1,6 +1,23 @@
 {
+//           "output":"LVDS-1",
 	   "modules-left": ["custom/dwl_tag#0", "custom/dwl_tag#1", "custom/dwl_tag#2", "custom/dwl_tag#3", "custom/dwl_tag#4", "custom/dwl_tag#5", "custom/dwl_tag#6","custom/dwl_tag#7","custom/dwl_tag#8","custom/dwl_tag#9","custom/dwl_layout", "custom/dwl_title"],
-	
+
+           "modules-right": ["custom/screenshot","custom/sleep","clock"],
+           "clock":{
+                "format":"{:%a, %d, %b  %H:%M}"
+            },
+
+           "custom/sleep": {
+                 "on-click": "/usr/bin/sleep.sh",
+                 "format": " sleep "
+           },
+
+           "custom/screenshot": {
+                  "on-click": "grim",
+                  "format": " screenshot "
+                  //"tooltip": true,
+                  //"tooltip": " find -cmin -1|grep _grim.png  to find the picture "
+           },	  
 
    // The empty '' argument used in the following "exec": fields works for single-monitor setups
    // For multi-monitor setups, see https://github.com/Alexays/Waybar/wiki/Configuration
@@ -9,63 +26,73 @@
 
 	   "custom/dwl_tag#0": {
 	     "exec": "/usr/bin/waybar-dwl.sh '' 0",
+             "on-click": "wtype -M logo 1 -m logo",
 	     "format": "{}",
-	     "return-type": "json"
+	     "return-type": "json",
 	   },
 	   "custom/dwl_tag#1": {
 	     "exec": "/usr/bin/waybar-dwl.sh '' 1",
+            "on-click": "wtype -M logo 2 -m logo",
 	     "format": "{}",
-	     "return-type": "json"
+	     "return-type": "json",
 	   },
 	   "custom/dwl_tag#2": {
 	     "exec": "/usr/bin/waybar-dwl.sh '' 2",
+             "on-click": "wtype -M logo 3 -m logo",
 	     "format": "{}",
-	     "return-type": "json"
+	     "return-type": "json",
 	   },
 	   "custom/dwl_tag#3": {
 	     "exec": "/usr/bin/waybar-dwl.sh '' 3",
+             "on-click": "wtype -M logo 4 -m logo",
 	     "format": "{}",
-	     "return-type": "json"
+	     "return-type": "json",
 	   },
 	   "custom/dwl_tag#4": {
 	     "exec": "/usr/bin/waybar-dwl.sh '' 4",
+             "on-click": "wtype -M logo 5 -m logo",
 	     "format": "{}",
-	     "return-type": "json"
+	     "return-type": "json",
 	   },
 	   "custom/dwl_tag#5": {
 	     "exec": "/usr/bin/waybar-dwl.sh '' 5",
+             "on-click": "wtype -M logo 6 -m logo",
 	     "format": "{}",
-	     "return-type": "json"
+	     "return-type": "json",
 	   },
 	   "custom/dwl_tag#6": {
 	     "exec": "/usr/bin/waybar-dwl.sh '' 6",
+             "on-click": "wtype -M logo 7 -m logo",
 	     "format": "{}",
-	     "return-type": "json"
+	     "return-type": "json",
 	   },
 	   "custom/dwl_tag#7": {
 	     "exec": "/usr/bin/waybar-dwl.sh '' 7",
+             "on-click": "wtype -M logo 8 -m logo",
 	     "format": "{}",
-	     "return-type": "json"
+	     "return-type": "json",
 	   },
 	   "custom/dwl_tag#8": {
 	     "exec": "/usr/bin/waybar-dwl.sh '' 8",
+             "on-click": "wtype -M logo 9 -m logo",
 	     "format": "{}",
-	     "return-type": "json"
+	     "return-type": "json",
 	   },
 	   "custom/dwl_tag#9": {
 	     "exec": "/usr/bin/waybar-dwl.sh '' 9",
+             "on-click": "wtype -M logo 0 -m logo",
 	     "format": "{}",
-	     "return-type": "json"
+	     "return-type": "json",
 	   },
 	   "custom/dwl_layout": {
 	     "exec": "/usr/bin/waybar-dwl.sh '' layout",
 	     "format": "{}",
-	     "return-type": "json"
+	     "return-type": "json",
 	   },
 	   "custom/dwl_title": {
-	     "exec": "/usr/bin/waybar-dwl.sh '' title",
+	     "exec": "/usr/bin/waybar-dwl.sh '' title",        
 	     "format": "{}",
 	     "escape": true,
-	     "return-type": "json"
+	     "return-type": "json",
 	   }
  }
