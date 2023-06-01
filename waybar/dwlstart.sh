@@ -11,7 +11,7 @@ gentoo-pipewire-launcher &
 fcitx5 -d
 #fcitx5 --verbose "*=5" -d
 
-waybar &
+waybar -c /etc/xdg/waybar/config_dwl -s /etc/xdg/waybar/style_dwl.css &
 #waybar --log-level debug > /tmp/waybar.log &
 
 #eval "/usr/bin/HDMI.sh dwl"
