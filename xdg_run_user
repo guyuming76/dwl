@@ -1,8 +1,10 @@
 # Configuration  because seatd does not do this for wayland compositor
+set -x
+
 YOUR_USER=$(id -u)
 YOUR_GROUP=$(id -g)
 
-XDG_RUNTIME_DIR=/run/user/$YOUR_USER
+XDG_RUNTIME_DIR="/run/user/$YOUR_USER"
 
 ## Delete existing directory, create a new one and set permissions
 sudo rm -rf $XDG_RUNTIME_DIR
