@@ -12,9 +12,7 @@ DWL使用和配置方法类似DWM:https://ratfactor.com/dwm
 geogebra 目前用xwayland,和fcitx5拼音输入的通讯依靠dbus。不过我觉得在xwayland下用，xwayland和wayland的交互看上去还是挺复杂的，如果遇到啥问题，我也是觉得在另外的TTY里打开一个DWM用比较省事，也就懒得琢磨DWL里xwayland这一块了。
 
 ![输入图片说明](20220910_10h16m58s_grim.png)
-kde, gnome下的文件管理器通常会带很多桌面环境依赖项.我除了用ranger,发现rfm挺好的，suckless的风格。配合imv看图,我做了一个小的配置改动，添加了一段小脚本，以便每次双击图片缩略图时不用打开新的IMV窗口，而是刷新现有窗口 : https://gitee.com/guyuming76/rfm/commit/c2bdc92c6b50f578032f2986dc40db8781dfb8ac 。我觉得这个例子比较好地体现了我对动态平铺窗口管理的理解：把传统的庞大的GUI应用分拆成小的独立应用。
-（更新2022/10/11：深入阅读rfm代码后，发觉同步线程时没用锁，用了几个变量设置状态，[我觉得有些不保险](https://github.com/padgettr/rfm/issues/3)，考虑要不要重写这一块，不知道其他主流文件管理器这一块怎么做的）
-
+我在rfm基础上的定制，方便看图，调用shell脚本进行文件操作：  https://gitee.com/guyuming76/rfm
 
 **在Gentoo上安装**
 --------------------------------
@@ -36,6 +34,15 @@ kde, gnome下的文件管理器通常会带很多桌面环境依赖项.我除了
 # emerge --ask --verbose --autounmask=y gui-wm/dwl::suckless_wl_zh
 
 ```
+
+我尝试过在virtualbox里面安装，我的设置是：
+virtualbox setting->Display里面 Graphic Controller 选的是VMSVGA，要设置enable 3D accelerate;
+gentoo /etc/portage/make.conf里，要设置 VIDEO_CARDS="vmware".
+
+和 gentoo openrc 搭配，我并没有选elogind,而是选了简单的seatd,[需要配置](https://wiki.gentoo.org/wiki/Seatd), 并且在dwl启动脚本里面[需要设置XDG_RUNTIME_DIR](https://forums.gentoo.org/viewtopic-p-8790881-highlight-.html)
+
+配置完locale,还要用fcitx5-configtool 配置拼音输入法，安装脚本里我默认添加了文泉驿正黑中文字体安装
+
 
 **How to start dwl**
 --------------------
