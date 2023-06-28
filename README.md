@@ -34,6 +34,15 @@ geogebra 目前用xwayland,和fcitx5拼音输入的通讯依靠dbus。不过我�
 # emerge --ask --verbose --autounmask=y gui-wm/dwl::suckless_wl_zh
 
 ```
+更新20230628：我在另一台机器上按照上面脚本同步了suckless_wl_zh仓库后，emerge 命令还是找不到包，后来发现要在 /etc/portage/repos.conf/eselect-repo.conf 文件中加入下面内容：
+```
+[suckless_wl_zh]
+location = /var/db/repos/suckless_wl_zh
+sync-type = git
+sync-uri = https://gitee.com/guyuming76/suckless_wl_zh.git
+```
+然后 `sudo eix-update`(这一步我不确定是否必要)
+
 
 我尝试过在virtualbox里面安装，我的设置是：
 virtualbox setting->Display里面 Graphic Controller 选的是VMSVGA，要设置enable 3D accelerate;
