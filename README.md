@@ -16,7 +16,7 @@ geogebra 目前用xwayland,和fcitx5拼音输入的通讯依靠dbus。不过我�
 
 **在Gentoo上安装**
 --------------------------------
-可以使用[我创建的自定义仓库](https://gitee.com/guyuming76/suckless_wl_zh)安装运行dwl安装. 我的dwl-9999.ebuild使用USE flag控制，默认安装了一些dwl上常用的应用，比如状态栏waybar,虚拟终端foot等. 除gentoo官方仓库外，还引用了 gentoo-zh 仓库里的fcitx5安装，和guru仓库里的wtype命令。
+可以使用[我创建的自定义仓库](https://gitee.com/guyuming76/suckless_wl_zh)安装dwl及相关依赖软件. 我的dwl-9999.ebuild使用USE flag控制，默认安装了一些dwl上常用的应用，比如状态栏waybar,虚拟终端foot等. 除gentoo官方仓库外，还引用了 gentoo-zh 仓库里的fcitx5安装，和guru仓库里的wtype命令。
 
 至于gentoo环境，只需要安装完stage3,内核，设置完网络，启动，locale 等，无需xorg及其他桌面环境，也就是说gentoo stage3只需要一个不带desktop的openrc包就可以. dwl安装会使用依赖安装wlroots. 为了运行一些只支持x 的应用，我还会另外安装xorg和DWM,而不是在DWL里使用xwayland.
 
@@ -34,7 +34,7 @@ geogebra 目前用xwayland,和fcitx5拼音输入的通讯依靠dbus。不过我�
 # emerge --ask --verbose --autounmask=y gui-wm/dwl::suckless_wl_zh
 
 ```
-更新20230628：我在另一台机器上按照上面脚本同步了suckless_wl_zh仓库后，emerge 命令还是找不到包，后来发现要在 /etc/portage/repos.conf/eselect-repo.conf 文件中加入下面内容：
+我在另一台机器上按照上面脚本同步了suckless_wl_zh仓库后，emerge 命令还是找不到包，后来发现要在 /etc/portage/repos.conf/eselect-repo.conf 文件中加入下面内容：
 ```
 [suckless_wl_zh]
 location = /var/db/repos/suckless_wl_zh
@@ -48,7 +48,7 @@ sync-uri = https://gitee.com/guyuming76/suckless_wl_zh.git
 virtualbox setting->Display里面 Graphic Controller 选的是VMSVGA，要设置enable 3D accelerate;
 gentoo /etc/portage/make.conf里，要设置 VIDEO_CARDS="vmware".
 
-和 gentoo openrc 搭配，我并没有选elogind,而是选了简单的seatd,[需要配置](https://wiki.gentoo.org/wiki/Seatd), 并且在dwl启动脚本里面[需要设置XDG_RUNTIME_DIR](https://forums.gentoo.org/viewtopic-p-8790881-highlight-.html)
+和 gentoo openrc 搭配，我并没有选elogind,而是选了简单的seatd,[需要配置](https://wiki.gentoo.org/wiki/Seatd), 并且在dwl启动脚本里面[需要设置XDG_RUNTIME_DIR](https://forums.gentoo.org/viewtopic-p-8790881-highlight-.html), 这个体现在下面的启动dwl的脚本里面，如果你使用的是systemd或elogind,XDG_RUNTIME_DIR 将会由系统自动设置。
 
 配置完locale,还要用fcitx5-configtool 配置拼音输入法，安装脚本里我默认添加了文泉驿正黑中文字体安装
 
