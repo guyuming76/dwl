@@ -14,9 +14,9 @@ geogebra 目前用xwayland,和fcitx5拼音输入的通讯依靠dbus。不过我�
 ![输入图片说明](20220910_10h16m58s_grim.png)
 我在rfm基础上的定制，方便看图，调用shell脚本进行文件操作：  https://gitee.com/guyuming76/rfm
 
-**在Gentoo上安装**
---------------------------------
-可以使用[我创建的自定义仓库](https://gitee.com/guyuming76/suckless_wl_zh)安装dwl及相关依赖软件. 我的dwl-9999.ebuild使用USE flag控制，默认安装了一些dwl上常用的应用，比如状态栏waybar,虚拟终端foot等. 除gentoo官方仓库外，还引用了 gentoo-zh 仓库里的fcitx5安装，和guru仓库里的wtype命令。
+**安装**
+------------------------
+像DWL这种suckless风格的程序通过源码编译安装其实还是比较容易的，git clone源码，准备好为数不多的依赖项后，make install 就可以了。并且这个Makefile也相对比较简单（这可能是我看懂的第一个Makefile）。但是为了自动装几个依赖项及常用包，特别是waybar的几个脚本及配置文件，[我还是在gentoo上做了自定义仓库](https://gitee.com/guyuming76/suckless_wl_zh) 和dwl-9999.ebuild安装脚本：使用USE flag控制，默认安装了状态栏waybar,虚拟终端foot等. 除gentoo官方仓库外，还引用了 gentoo-zh 仓库里的fcitx5拼音输入法安装，和guru仓库里的wtype命令。这个ebuild文件最初我是复制了gentoo guru仓库的dwl安装脚本，但是guru仓库的脚本仅仅安装了dwl本身，如上所述，源码编译安装dwl本身很简单，可以不用ebuild，麻烦的是安装配置waybar及常用软件，这是我做了自己的ebuild的原因,类似“装机一条龙”，今后随着我对平台的更多了解，还会修改添加更多的默认安装项。如果你使用别的linux发行版，这个ebuild文件也可以作为安装配置的参考文档。
 
 至于gentoo环境，只需要安装完stage3,内核，设置完网络，启动，locale 等，无需xorg及其他桌面环境，也就是说gentoo stage3只需要一个不带desktop的openrc包就可以. dwl安装会使用依赖安装wlroots. 为了运行一些只支持x 的应用，我还会另外安装xorg和DWM,而不是在DWL里使用xwayland.
 
