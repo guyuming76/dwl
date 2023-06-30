@@ -16,7 +16,7 @@ geogebra 目前用xwayland,和fcitx5拼音输入的通讯依靠dbus。不过我�
 
 **在Gentoo上安装**
 --------------------------------
-可以使用我创建的自定义仓库安装运行dwl安装. 我的dwl-9999.ebuild使用USE flag控制，默认安装了一些dwl上常用的应用，比如状态栏waybar,虚拟终端foot等. 除gentoo官方仓库外，还引用了 gentoo-zh 仓库里的fcitx5安装，和guru仓库里的wtype命令。
+可以使用[我创建的自定义仓库](https://gitee.com/guyuming76/suckless_wl_zh)安装运行dwl安装. 我的dwl-9999.ebuild使用USE flag控制，默认安装了一些dwl上常用的应用，比如状态栏waybar,虚拟终端foot等. 除gentoo官方仓库外，还引用了 gentoo-zh 仓库里的fcitx5安装，和guru仓库里的wtype命令。
 
 至于gentoo环境，只需要安装完stage3,内核，设置完网络，启动，locale 等，无需xorg及其他桌面环境，也就是说gentoo stage3只需要一个不带desktop的openrc包就可以. dwl安装会使用依赖安装wlroots. 为了运行一些只支持x 的应用，我还会另外安装xorg和DWM,而不是在DWL里使用xwayland.
 
