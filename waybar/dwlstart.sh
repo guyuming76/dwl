@@ -8,7 +8,7 @@ rm ${fname}
 
 gentoo-pipewire-launcher &
 
-fcitx5 -d
+fcitx5 -d --disable dbus
 #fcitx5 --verbose "*=5" -d
 
 waybar -c /etc/xdg/waybar/config_dwl -s /etc/xdg/waybar/style_dwl.css &
