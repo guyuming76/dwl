@@ -1086,7 +1086,7 @@ createmon(struct wl_listener *listener, void *data)
 	wlr_output_commit(wlr_output);
 
 	wl_list_insert(&mons, &m->link);
-
+	printstatus();
 	/* The xdg-protocol specifies:
 	 *
 	 * If the fullscreened surface is not opaque, the compositor must make
@@ -1111,8 +1111,6 @@ createmon(struct wl_listener *listener, void *data)
 		wlr_output_layout_add_auto(output_layout, wlr_output);
 	else
 		wlr_output_layout_add(output_layout, wlr_output, m->m.x, m->m.y);
-
-	//printstatus();
 
 	strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, LENGTH(m->ltsymbol));
 }
