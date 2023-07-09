@@ -146,6 +146,7 @@ typedef struct {
 #ifdef XWAYLAND
 	struct wl_listener activate;
 	struct wl_listener configure;
+	struct wl_listener set_hints;
 #endif
 	unsigned int bw;
 	uint32_t tags;
@@ -1311,6 +1312,7 @@ destroynotify(struct wl_listener *listener, void *data)
 #ifdef XWAYLAND
 	if (c->type != XDGShell) {
 		wl_list_remove(&c->configure.link);
+		wl_list_remove(&c->set_hints.link);
 		wl_list_remove(&c->activate.link);
 	}
 #endif
