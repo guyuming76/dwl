@@ -109,7 +109,7 @@
 # }
 
 # Variables
-declare output title layout activetags selectedtags
+declare output title layout activetags selectedtags focusedtag
 declare -a tags name
 readonly fname="$HOME"/.cache/dwltags
 #  TODO: what if there are multiple DWL instance which share the the file name, will is cause problem? and this file will increese constantly, how to trim it? 
@@ -137,6 +137,7 @@ _cycle() {
 
 	    if (( "${activetags}"   & mask )) 2>/dev/null; then this_status+='"active",'  ; fi
 	    if (( "${selectedtags}" & mask )) 2>/dev/null; then this_status+='"selected",'; fi
+	    if (( "${focusedtag}" & mask )) 2>/dev/null; then this_status+='"focused",'; fi
 	    if (( "${urgenttags}"   & mask )) 2>/dev/null; then this_status+='"urgent",'  ; fi
 
 	    if [[ "${this_status}" ]]; then
@@ -171,6 +172,7 @@ while [[ -n "$(pgrep waybar)" ]] ; do
     # Get the tag bit mask as a decimal
     activetags="$(echo "${output}"   | grep '^[[:graph:]]* tags' | awk '{print $3}')"
     selectedtags="$(echo "${output}" | grep '^[[:graph:]]* tags' | awk '{print $4}')"
+    focusedtag="$(echo "${output}"   | grep '^[[:graph:]]* tags' | awk '{print $5}')"
     urgenttags="$(echo "${output}"   | grep '^[[:graph:]]* tags' | awk '{print $6}')"
 
     _cycle
@@ -180,5 +182,4 @@ while [[ -n "$(pgrep waybar)" ]] ; do
 
 done
 
-unset -v activetags layout name output selectedtags tags title
-
+unset -v activetags layout name output selectedtags tags title focusedtag
