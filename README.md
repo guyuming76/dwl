@@ -50,6 +50,17 @@ gentoo /etc/portage/make.conf里，要设置 VIDEO_CARDS="vmware".
 
 和 gentoo openrc 搭配，我并没有选elogind,而是选了简单的seatd,[需要配置](https://wiki.gentoo.org/wiki/Seatd), 并且在dwl启动脚本里面[需要设置XDG_RUNTIME_DIR](https://forums.gentoo.org/viewtopic-p-8790881-highlight-.html), 这个体现在下面的启动dwl的脚本里面，如果你使用的是systemd或elogind,XDG_RUNTIME_DIR 将会由系统自动设置。
 
+在openrc seatd环境下查看seatd的日志, 日志在/tmp/seatdstderr文件里:
+```
+#cat /etc/init.d/seatd
+
+#!/sbin/openrc-run
+supervisor=supervise-daemon
+command="seatd"
+command_args="-g video -l debug"
+start_stop_daemon_args="--stdout /tmp/seatdstdout  --stderr /tmp/seatdstderr"
+```
+
 配置完locale,还要用fcitx5-configtool 配置拼音输入法，安装脚本里我默认添加了文泉驿正黑中文字体安装
 
 
