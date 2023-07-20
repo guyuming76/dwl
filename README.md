@@ -97,7 +97,8 @@ export LC_TIME="zh_CN.utf8"
 
 export _JAVA_AWT_WM_NONREPARENTING=1
 
-dbus-run-session dwl -s ~/dwlstart.sh -d  2>/tmp/dwl.log
+dwl -s ~/dwlstart.sh -d  2>/tmp/dwl.log
+# 更新20230720: 刚开始学linux的时候,总是在dbus环境下启动,后来发觉不用dbus也行,只是一些小问题,比如: https://github.com/fcitx/fcitx5-configtool/issues/65
 # 可以在一个命令行窗口运行 tail -f /tmp/dwl.log 查看日志
 
 #dbus-run-session dwl -s ~/dwlstart.sh -i  2>/tmp/dwl.log
