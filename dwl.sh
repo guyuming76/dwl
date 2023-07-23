@@ -2,9 +2,8 @@
 
 set -x
 
-export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export XDG_RUNTIME_DIR="/tmp/XDG_RUNTIME_DIR_$(id -u)_$$"
 xdg_run_user
-
 
 export GTK_IM_MODULE="wayland"
 export _JAVA_AWT_WM_NONREPARENTING=1
