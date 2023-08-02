@@ -6,6 +6,7 @@
 #
 # USAGE: waybar-dwl.sh MONITOR COMPONENT
 #        "COMPONENT" is an integer representing a dwl tag OR "layout" OR "title"
+# 调试方法: bashdb waybar-dwl.sh "VGA-1" 3
 #
 # REQUIREMENTS:
 #  - inotifywait ( 'inotify-tools' on arch )
