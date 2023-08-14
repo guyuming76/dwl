@@ -120,8 +120,12 @@ readonly fname="$HOME"/.cache/dwltags
 tags=( "1" "2" "3" "4" "5" "6" "7" "8" "9" )
 name=( "1" "2" "3" "4" "5" "6" "7" "8" "9" ) # Array of labels for tags
 
-#monitor="${1}"
-monitor="LVDS-1"
+monitor="${1}"
+# 对于单显示器来说,直接用${1}, 也就是config-dwl里面传进来的参数空字符串方便些,不论啥wlr-randr output名称都不用改
+# 我在 https://github.com/Alexays/Waybar/issues/147 看到多显示器设置,但问题是不知道当点击某个显示器上的标签时,把显示器名称从config-dwl传到当前脚本;
+# 一个想法就是在config-dwl里为每个output写一组配置,output名称写死在文件里,在使用wlr-randr 配置显示的时候,动态改config-dwl文件内容.但总觉得这样不好
+# 现在觉得waybar复杂了,要是用suckless风格,使用gtk+重写一个简单点的配合dwl使用,会不会好些?
+# monitor="LVDS-1"
 # 我的笔记本显示屏名字，这个值可以从前面 fname 变量对应的文件内容中找到，如果是多个显示器，就不能写死在当前脚本里，而是要由本脚本的调用者用参数传入
 
 component="${2}"
