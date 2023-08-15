@@ -9,7 +9,10 @@
 
            "custom/sleep": {
                  "on-click": "sudo /usr/bin/sleep.sh",
+		// in /etc/sudoers, enable subo without password for this sleep.sh
                  "format": " sleep "
+		//"on-click": "systemctl suspend"
+		//for systemd, simply use systemctl to sleep
            },
 
            "custom/screenshot": {
