@@ -1,10 +1,9 @@
+[阅读本文前请先阅读DWL官方README](https://github.com/djpohly/dwl/)
 
-This repository is used for my testing and fixing "text input and input method" PR for DWL.
-
-DWL使用和配置方法类似DWM:https://ratfactor.com/dwm
+[DWL使用和配置方法类似DWM](https://ratfactor.com/dwm)
 
 
-**sreenshots**
+**几个截屏**
 ------------------------
 ![输入图片说明](20220908_16h12m06s_grim.png)
 ![输入图片说明](20220917_18h37m45s_grim.png)
@@ -14,13 +13,14 @@ geogebra 目前用xwayland,和fcitx5拼音输入的通讯依靠dbus。不过我�
 ![输入图片说明](20220910_10h16m58s_grim.png)
 我在rfm基础上的定制，方便看图，调用shell脚本进行文件操作：  https://gitee.com/guyuming76/rfm
 
+
+
 **安装**
 ------------------------
-像DWL这种suckless风格的程序通过源码编译安装其实还是比较容易的，git clone源码，准备好为数不多的依赖项后，make install 就可以了。并且这个Makefile也相对比较简单（这可能是我看懂的第一个Makefile）。但是为了自动装几个依赖项及常用包，特别是waybar的几个脚本及配置文件，[我还是在gentoo上做了自定义仓库](https://gitee.com/guyuming76/suckless_wl_zh) 和dwl-9999.ebuild安装脚本：使用USE flag控制，默认安装了状态栏waybar,虚拟终端foot等. 除gentoo官方仓库外，还引用了 gentoo-zh 仓库里的fcitx5拼音输入法安装，和guru仓库里的wtype命令。这个ebuild文件最初我是复制了gentoo guru仓库的dwl安装脚本，但是guru仓库的脚本仅仅安装了dwl本身，如上所述，源码编译安装dwl本身很简单，可以不用ebuild，麻烦的是安装配置waybar及常用软件，这是我做了自己的ebuild的原因,类似“装机一条龙”，今后随着我对平台的更多了解，还会修改添加更多的默认安装项。如果你使用别的linux发行版，这个ebuild文件也可以作为安装配置的参考文档。
+像DWL这种suckless风格的程序通过源码编译安装其实还是比较容易的，git clone源码，准备好为数不多的依赖项后，make install 就可以了(在 DWL 原 config.mk 里， 我添加了 `IM = -DIM` 参数，默认编译包含用 `#ifdef IM` 条件包括的拼音输入支持代码)。并且这个Makefile也相对比较简单（这可能是我看懂的第一个Makefile）。但是为了自动装几个依赖项及常用包，特别是waybar的几个脚本及配置文件，[我还是在gentoo上做了自定义仓库](https://gitee.com/guyuming76/suckless_wl_zh) 和dwl-9999.ebuild安装脚本：使用USE flag控制，默认安装了状态栏waybar,虚拟终端foot等. 除gentoo官方仓库外，还引用了 gentoo-zh 仓库里的fcitx5拼音输入法安装，和guru仓库里的wtype命令。这个ebuild文件最初我是复制了gentoo guru仓库的dwl安装脚本，但是guru仓库的脚本仅仅安装了dwl本身，如上所述，源码编译安装dwl本身很简单，可以不用ebuild，麻烦的是安装配置waybar及常用软件，这是我做了自己的ebuild的原因,类似“装机一条龙”，今后随着我对平台的更多了解，还会修改添加更多的默认安装项。如果你使用别的linux发行版，这个ebuild文件也可以作为安装配置的参考文档。
+
 
 至于gentoo环境，只需要安装完stage3,内核，设置完网络，启动，locale 等，无需xorg及其他桌面环境，也就是说gentoo stage3只需要一个不带desktop的openrc包就可以. dwl安装会使用依赖安装wlroots. 为了运行一些只支持x 的应用，我还会另外安装xorg和DWM,而不是在DWL里使用xwayland.
-
-安装完成后，在tty里运行dwl.sh启动图形界面。
 
 ```
 # cd /var/db/repos
@@ -64,106 +64,22 @@ start_stop_daemon_args="--stdout /tmp/seatdstdout  --stderr /tmp/seatdstderr"
 配置完locale,还要用fcitx5-configtool 配置拼音输入法，安装脚本里我默认添加了文泉驿正黑中文字体安装
 
 
-**How to start dwl**
+**如何启动DWL**
 --------------------
 
-The command i use to start dwl from tty:
+安装后系统上要有 dwl.sh 脚本，开机进入tty登录后查看，修改（依据你是否使用systemd,是否需要dbus），运行 dwl.sh 即可。
 
-```
-guyuming@localhost ~/dwl $ cat ~/xdg_run_user
-# Configuration  because seatd does not do this for wayland compositor
-YOUR_USER=$(id -u)
-YOUR_GROUP=$(id -g)
+刚开始学linux的时候,我总是在dbus环境下启动dwl,后来发现dbus也不是最少必须的，只是不用有些需要dbus的软件会遇到些问题,比如: https://github.com/fcitx/fcitx5-configtool/issues/65
 
-XDG_RUNTIME_DIR=/run/user/$YOUR_USER
+可以在一个命令行窗口运行 tail -f /tmp/dwl.log 查看日志。
 
-## Delete existing directory, create a new one and set permissions
-sudo rm -rf $XDG_RUNTIME_DIR
-sudo mkdir -p $XDG_RUNTIME_DIR
-sudo chown $YOUR_USER:$YOUR_GROUP $XDG_RUNTIME_DIR
-sudo chmod 700 $XDG_RUNTIME_DIR
+dwl.sh 里运行dwl会使用 dwlstart.sh 脚本，而本仓库包含两个 dwlstart.sh 文件，通常，我都会使用waybar配合dwl, 也就是说，安装会复制waybar/dwlstart.sh 到你的运行目录。
 
-gym@gymDeskGentoo ~ $ cat ./dwl.sh
-
-~/xdg_run_user
-export XDG_RUNTIME_DIR=/run/user/$(id -u)
-#我今天把系统从 openrc+elogind 换成openrc+seatd,结果发现系统启动后没有 /run/user 目录，也没有设置XDG_RUNTIME_DIR,所以添加了上面两行。不是这个情况得话，上面可以注释掉
-
-export GTK_IM_MODULE="wayland"
-export QT_IM_MODULE=compose
-export XMODIFIERS=@im=none
-
-export LC_TIME="zh_CN.utf8"
-
-export _JAVA_AWT_WM_NONREPARENTING=1
-
-dwl -s ~/dwlstart.sh -d  2>/tmp/dwl.log
-# 更新20230720: 刚开始学linux的时候,总是在dbus环境下启动,后来发觉不用dbus也行,只是一些小问题,比如: https://github.com/fcitx/fcitx5-configtool/issues/65
-# 可以在一个命令行窗口运行 tail -f /tmp/dwl.log 查看日志
-
-#dbus-run-session dwl -s ~/dwlstart.sh -i  2>/tmp/dwl.log
-# -d level log add the keypress events based on -i level, which is large in quantity
-# -d 参数在 -i 水平的基础上再加上 keypress 事件，日志量会大许多
-
-#WAYLAND_DEBUG=1 dbus-run-session dwl -s ~/dwlstart.sh -i  2>/tmp/dwl.log
-#dbus-run-session dwl -s ~/dwlstart.sh -i
-#dbus-run-session dwl -s ~/dwlstart.sh -i 2>/dev/tty2
-
-```
-
-the content of dwlstart script:
-
-```
-#!/bin/sh
-
-fname="$HOME"/.cache/dwltags
-
-gentoo-pipewire-launcher &
-
-#fcitx5 -d
-fcitx5 -d --disable dbus
-#https://github.com/fcitx/fcitx5/discussions/523
-#in /etc/environment, i have GTK_IM_MODULE="wayland"
-#and in .xinitrc, i have export GTK_IM_MODULE="fcitx"
-
-#fcitx5 --verbose "*=5" -d
-
-waybar --log-level debug > /tmp/waybar.log  &
-#i cloned waybar project here:https://gitee.com/guyuming76/dwl
-#all i did is adding spdlog entries to help me understand how waybar works.
-
-eval "/home/guyuming/HDMI.sh dwl" &
-#调用脚本，用wlr-randr命令设置多显示器模式，比如让投影仪复制显示主屏幕
-
-while
-	read line; do echo $line >> ${fname} ;
-done
-```
-
-
--------------------------------------------------------------------------------------------
-**How to install my waybar script**
------------------------------------
-i put waybar related scripts in the following link, i think better way to clean the ~/.cache/dwltags file should be provided.
-
-https://gitee.com/guyuming76/personal/tree/dwl/gentoo/waybar-dwl
-
-1. copy the config and style.css files to override the waybar defaults, in my case, /etc/xdg/waybar/config  /etc/xdg/waybar/style.css
-2. copy waybar-dwl.sh to ~/waybar-dwl.sh, which is referenced in the config file above
-3. copy dwlstart.sh to ~/dwlstart.sh and modify it as you need, waybar is started in it
-4. the config file depends on wtype package(from gentoo guru repository in my case) in on-click event, if you don't want to use it, you can remove all those on-click lines. And the MOD key is default to alt here, if you have customized the MOD key in dwl config.h, change alt to your custom MOD key here in config accordingly.
-
-run dbus-run-session dwl -s ~/dwlstart.sh to start dwl. you might find that the current selected tag for waybar is not highlighted, you can run ~/.cache/dwltags, the first column contains the name of your monitor. Then you can edit the waybar-dwl.sh, find the monitor= line and assign it with your monitor name.
-
--------------------------------------------------------------------------------------------
-Waybar用到 spdlog ,  http://t.zoukankan.com/shuqin-p-12214439.html 提到“多生产者多消费者队列 默认为阻塞模式，也可以设置为非阻塞，不过这个非阻塞的处理非常简单粗暴，就是简单的丢弃最老的日志，推荐是不要这样设置滴，一般产生阻塞的情况大概是磁盘IO打满了，出现这个情况一般是别的地方出问题了。
-
-
--------------------------------------------------------------------------------------------------
+dwlstart.sh 里启动waybar, 会用参数指明配置文件路径。
 
 
 **DWL下设置投影仪**
---------------------------------
+---------------------------
 用wlr-randr,我在gentoo上是从guru仓库安装的。wlr-randr 貌似没有--left-of 参数，但可以用--pos设置输出起始坐标，如果投影仪和显示器起始坐标都是0,0,效果就相当于“双屏复制”显示
 
 ```
@@ -189,19 +105,19 @@ else
 fi
 ```
 
---------------------------------------------------------------------------------------------
+------------------------
 **MISC**
 ---------------
 [合并上游更新操作步骤](stepsToMergeUpstreamMain.md)
 
- **另外，我不一定能及时合并Upstream的更新，关于输入法的那个pull request的代码，我加了#ifdef IM 这个编译条件，找到这个编译条件包含的代码，手工复制到上游代码理论上也行。** 
+我不一定能及时合并Upstream的更新，关于输入法支持代码，我加了#ifdef IM 这个编译条件，找到这个编译条件包含的代码，手工复制到上游代码理论上也行。
+
+fixDnD 是最后一个支持 wlroots 0.15 的分支，后面的分支，比如V0.4, 基于wlroots 0.16。我一般都使用本仓库默认分支，并随着内容改动调整本仓库默认分支。
 
 在wayland下使用 sudo 运行图形界面程序，比如当我用guyuming登录时,wpa_gui里面控件显示数据为空，而 `sudo wpa_gui` 会报错，但是 `sudo -EH wpa_gui` 就可以了。[参见](https://unix.stackexchange.com/questions/422040/will-wayland-ever-support-graphical-sudo) 
 
 
 [History](History.md) 
-
-fixDnD 是最后一个支持 wlroots 0.15 的分支，后面的分支，比如V0.4, 基于wlroots 0.16
 
 看图片软件:imv
 看视频软件:mpv

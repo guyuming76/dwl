@@ -4,6 +4,8 @@ set -x
 
 export XDG_RUNTIME_DIR="/tmp/XDG_RUNTIME_DIR_$(id -u)_$$"
 xdg_run_user
+# you don't need the above two lines to set XDG_RUNTIME_DIR if you use systemd or elogind. I use seatd, so i have the above two linesl
+
 
 export GTK_IM_MODULE="wayland"
 export _JAVA_AWT_WM_NONREPARENTING=1
