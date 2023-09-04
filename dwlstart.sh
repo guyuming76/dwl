@@ -1,6 +1,6 @@
 #!/bin/sh
 
-gentoo-pipewire-launcher &
+#gentoo-pipewire-launcher &
 
 fcitx5 -d --disable dbus
 #fcitx5 --verbose "*=5" -d
