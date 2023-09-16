@@ -1023,7 +1023,7 @@ createmon(struct wl_listener *listener, void *data)
 	const MonitorRule *r;
 	size_t i;
 	Monitor *m = wlr_output->data = ecalloc(1, sizeof(*m));
-	wlr_log(WLR_INFO,"createmon");
+	wlr_log(WLR_INFO,"createmon %s",wlr_output->name);
 	m->wlr_output = wlr_output;
 	
 	wlr_output_init_render(wlr_output, alloc, drw);
@@ -2124,9 +2124,9 @@ printstatus(void)
 
 		printf("%s selmon %u\n", m->wlr_output->name, m == selmon);
 
-		wlr_log(WLR_INFO,"%s selmon %u", m->wlr_output->name, m == selmon);
+		wlr_log(WLR_INFO,"%s m==selmon:%u", m->wlr_output->name, m == selmon);
 		printf("%s tags %u %u %u %u\n", m->wlr_output->name, occ, m->tagset[m->seltags],sel, urg);
-		wlr_log(WLR_INFO,"%s tags %u %u %u %u", m->wlr_output->name, occ, m->tagset[m->seltags],sel, urg);
+		wlr_log(WLR_INFO,"%s tags occ:0x%x, m->tagset[m->seltags]:0x%x, sel:0x%x(focustop(m)->tags), urg:0x%x", m->wlr_output->name, occ, m->tagset[m->seltags],sel, urg);
 		printf("%s layout %s\n", m->wlr_output->name, m->ltsymbol);
 		wlr_log(WLR_INFO,"%s layout %s", m->wlr_output->name, m->ltsymbol);
 	    }
@@ -3426,7 +3426,7 @@ urgent(struct wl_listener *listener, void *data)
 void
 view(const Arg *arg)
 {
-        wlr_log(WLR_INFO,"view");
+        wlr_log(WLR_INFO,"view arg->ui:0x%x, TAGMASK:0x%x, selmon->seltags:0x%x, selmon->tagset[selmon->seltags]:0x%x(before)", arg->ui,TAGMASK, selmon->seltags, selmon->tagset[selmon->seltags]);
 	if (!selmon || (arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
 		return;
 
