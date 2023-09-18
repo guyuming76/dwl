@@ -203,7 +203,7 @@ struct Monitor {
 	const Layout *lt[2];
 	unsigned int seltags;
 	unsigned int sellt;
-	uint32_t tagset[2];
+        uint32_t tagset[2]; //这是一个两个元素的数组,我的理解是当作一个两个元素的循环链表或队列来使用,对应用户操作前的状态值和用户操作后的状态值,比如在view方法里(就是用户按 MOD+tag号 对应的函数), 通过类似 seltags^=1 这样的操作在0和1之间切换这个数组的访问下标
 	double mfact;
 	int nmaster;
 	char ltsymbol[16];
