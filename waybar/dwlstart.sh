@@ -16,6 +16,8 @@ waybar -c /etc/xdg/waybar/config_dwl -s /etc/xdg/waybar/style_dwl.css &
 
 #eval "/usr/bin/HDMI.sh dwl"
 
+foot rfm  &
+
 while 
 	read line; do echo $line >> ${fname} ; 
 done
