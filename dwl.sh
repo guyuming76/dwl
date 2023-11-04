@@ -13,7 +13,7 @@ export _JAVA_AWT_WM_NONREPARENTING=1
 echo "export WLR_NO_HARDWARE_CURSORS=1    # try this if you don't see cursor in dwl"
 #in my virtualbox guest cursor won't display in dwl. i need to set this to fix
 
-WLR_DRM_DEVICES=/dev/dri/card0 dwl -s /usr/bin/dwlstart.sh  2>/tmp/dwl.log
+WLR_DRM_DEVICES=/dev/dri/card0 dwl -s /usr/bin/dwlstart.sh  2>/tmp/dwl_$(id -u)_$$.log
 #https://github.com/swaywm/sway/issues/7240
 
 #dwl -s /usr/bin/dwlstart.sh  2>/tmp/dwl.log
