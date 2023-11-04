@@ -112,7 +112,8 @@
 # Variables
 declare output title layout activetags selectedtags focusedtag
 declare -a tags name
-readonly fname="$HOME"/.cache/dwltags
+# readonly fname="$HOME"/.cache/dwltags
+readonly fname="$XDG_RUNTIME_DIR"/dwltags
 #  TODO: what if there are multiple DWL instance which share the the file name, will is cause problem? and this file will increese constantly, how to trim it? 
 
 
@@ -166,7 +167,7 @@ _cycle() {
 while [[ -n "$(pgrep waybar)" ]] ; do
 
     [[ ! -f "${fname}" ]] && printf -- '%s\n' \
-				    "You need to redirect dwl stdout to ~/.cache/dwltags" >&2
+				    "You need to redirect dwl stdout to dwltags" >&2
 
     # Get info from the file
     output="$(grep  "${monitor}" "${fname}" | tail -n7)"
