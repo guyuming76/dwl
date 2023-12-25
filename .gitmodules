@@ -1,0 +1,3 @@
+[submodule "devPicAndVideo"]
+	path = devPicAndVideo
+	url = https://gitee.com/guyuming76/dwl-dev-pic-and-video.git
