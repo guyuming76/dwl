@@ -1,0 +1,27 @@
+#custom-dwl_layout {
+     color: #EC5800
+}
+	
+#custom-dwl_title {
+     color: #017AFF
+}
+	
+#custom-dwl_tag {
+     color: #875F00
+}
+	
+#custom-dwl_tag.selected {
+     color: #017AFF
+}
+	
+#custom-dwl_tag.urgent {
+     background-color: #FF0000
+}
+
+#custom-dwl_tag.active {
+     border-top: 1px solid #EC5800
+}
+
+#custom-dwl_tag.focused {
+     color: #FFFFFF
+}

@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Configuration  because seatd does not do this for wayland compositor
+set -x
+
+if [[ ! -z "$XDG_RUNTIME_DIR" ]]; then
+## Delete existing directory, create a new one and set permissions
+	YOUR_USER=$(id -u)
+	YOUR_GROUP=$(id -g)
+
+	rm -rf $XDG_RUNTIME_DIR
+	mkdir -p $XDG_RUNTIME_DIR
+	chown $YOUR_USER:$YOUR_GROUP $XDG_RUNTIME_DIR
+	chmod 700 $XDG_RUNTIME_DIR
+
+fi
